@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { encryptText, decryptText, calculateHash } from "./crypto";
 import {
@@ -191,6 +191,15 @@ export default function App() {
       localStorage.setItem("theme", "light");
     }
   }, [isDarkMode]);
+
+  // Clean URL hashes (#fitur, #metodologi) from address bar if present
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      if (window.location.hash === "#fitur" || window.location.hash === "#metodologi") {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    }
+  }, []);
 
   // Authentication & View states
   const [authState, setAuthState] = useState<"landing" | "login" | "authenticated">("landing");
@@ -3909,13 +3918,11 @@ grant all on succession_data to anon, authenticated, service_role;`
               </div>
             </div>
 
-            {/* Middle Nav Links */}
-            <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-700 dark:text-slate-100">
-              <a href="#metodologi" className="text-slate-700 dark:text-slate-100 hover:text-primary dark:hover:text-teal-400 transition-colors">Metodologi Asesmen</a>
-              <a href="#fitur" className="text-slate-700 dark:text-slate-100 hover:text-primary dark:hover:text-teal-400 transition-colors">Pilar Evaluasi</a>
+            {/* Middle Status Indicator */}
+            <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-100">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-slate-700 dark:text-slate-100 font-extrabold">Akses HR Internal</span>
-            </nav>
+            </div>
             
             <div className="flex items-center gap-3">
               {/* Dark Mode Toggle Button */}
@@ -3967,12 +3974,15 @@ grant all on succession_data to anon, authenticated, service_role;`
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 
-                <a 
-                  href="#metodologi"
-                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold px-6 py-3.5 rounded-lg shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                <button 
+                  type="button"
+                  onClick={() => {
+                    document.getElementById("section-metodologi")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold px-6 py-3.5 rounded-lg shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Pelajari Parameter Matrix</span>
-                </a>
+                </button>
               </div>
             </div>
 
@@ -4205,7 +4215,7 @@ grant all on succession_data to anon, authenticated, service_role;`
         </section>
 
         {/* Metodologi Section */}
-        <section id="metodologi" className="py-16 md:py-20 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
+        <section id="section-metodologi" className="py-16 md:py-20 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
           <div className="max-w-7xl mx-auto px-6 space-y-12">
             <div className="text-center space-y-3">
               <span className="text-[10px] font-black text-primary dark:text-teal-400 uppercase tracking-wider block">Standardisasi Metodologi Penilaian</span>
@@ -4262,7 +4272,7 @@ grant all on succession_data to anon, authenticated, service_role;`
         </section>
 
         {/* Internal Security & Policy Section */}
-        <section id="fitur" className="py-14 bg-slate-50 dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800">
+        <section id="section-governance" className="py-14 bg-slate-50 dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800">
           <div className="max-w-7xl mx-auto px-6 text-left">
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 shadow-xs grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="space-y-5">
