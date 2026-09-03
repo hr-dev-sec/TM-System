@@ -3,11 +3,93 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <title>Talent Advisor - Executive Succession Portal</title>
+    <meta name="description" content="A premium, elegant corporate talent assessment and profile dashboard for strategic planning." />
+    <meta property="og:title" content="Talent Advisor - Executive Succession Portal" />
+    <meta property="og:description" content="A premium, elegant corporate talent assessment and profile dashboard for strategic planning." />
+    <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/0/01/Ajinomoto_Group_Global_Brand_logo.png" />
+
+    <!-- Static Favicon and Touch Icon Links (Public Ajinomoto Brand Assets) -->
+    <link rel="icon" type="image/png" sizes="64x64" href="https://upload.wikimedia.org/wikipedia/commons/0/01/Ajinomoto_Group_Global_Brand_logo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://upload.wikimedia.org/wikipedia/commons/0/01/Ajinomoto_Group_Global_Brand_logo.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://upload.wikimedia.org/wikipedia/commons/0/01/Ajinomoto_Group_Global_Brand_logo.png" />
+    <link rel="apple-touch-icon-precomposed" href="https://upload.wikimedia.org/wikipedia/commons/0/01/Ajinomoto_Group_Global_Brand_logo.png" />
+
+    <!-- Dynamic Favicon & Apple Touch Icon Brand Injector -->
+    <script>
+      (function() {
+        const AJINOMOTO_BRAND_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/0/01/Ajinomoto_Group_Global_Brand_logo.png";
+
+        function applyAjinomotoBrandIcons() {
+          const iconConfigs = [
+            { rel: "icon", type: "image/png", sizes: "64x64" },
+            { rel: "icon", type: "image/png", sizes: "32x32" },
+            { rel: "icon", type: "image/x-icon" },
+            { rel: "shortcut icon", type: "image/png" },
+            { rel: "apple-touch-icon", sizes: "180x180" },
+            { rel: "apple-touch-icon-precomposed" }
+          ];
+
+          iconConfigs.forEach(function(config) {
+            let link = document.querySelector('link[rel="' + config.rel + '"]' + (config.sizes ? '[sizes="' + config.sizes + '"]' : ''));
+            if (!link) {
+              link = document.createElement("link");
+              link.rel = config.rel;
+              if (config.sizes) link.setAttribute("sizes", config.sizes);
+              document.head.appendChild(link);
+            }
+            if (config.type) link.type = config.type;
+            link.href = AJINOMOTO_BRAND_LOGO_URL;
+          });
+        }
+
+        // Apply corporate icon links immediately
+        applyAjinomotoBrandIcons();
+
+        // Dynamically generate high-resolution canvas icon with crisp square padding
+        try {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = function() {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = 128;
+              canvas.height = 128;
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                ctx.clearRect(0, 0, 128, 128);
+                // Center-fit the Ajinomoto logo inside a 128x128 bounding box with generous padding
+                const maxDim = 116;
+                const scale = Math.min(maxDim / img.width, maxDim / img.height);
+                const drawW = img.width * scale;
+                const drawH = img.height * scale;
+                const offsetX = (128 - drawW) / 2;
+                const offsetY = (128 - drawH) / 2;
+
+                ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+                const renderedDataUrl = canvas.toDataURL("image/png");
+
+                const iconLinks = document.querySelectorAll('link[rel*="icon"]');
+                iconLinks.forEach(function(el) {
+                  el.href = renderedDataUrl;
+                });
+              }
+            } catch (err) {
+              // Keep direct public URL fallback
+            }
+          };
+          img.src = AJINOMOTO_BRAND_LOGO_URL;
+        } catch (err) {
+          // Keep direct public URL fallback
+        }
+
+        // Re-assert corporate branding on document state change or tab refocus
+        document.addEventListener("visibilitychange", function() {
+          applyAjinomotoBrandIcons();
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

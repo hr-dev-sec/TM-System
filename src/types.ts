@@ -139,3 +139,21 @@ export interface SupabaseNoticeModalConfig {
   sqlSnippet?: string;
 }
 
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  password?: string;
+  role: "admin" | "user";
+  title: string;
+  department: string;
+  status: "active" | "inactive";
+  linkedTalentId?: string;
+  avatar?: string;
+  initials?: string;
+  notes?: string;
+  lastLogin?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

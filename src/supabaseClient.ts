@@ -1,10 +1,75 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { UserAccount } from "./types";
 
 export interface SupabaseConfig {
   url: string;
   anonKey: string;
   isEnabled: boolean;
 }
+
+export const USER_ACCOUNTS_SQL_SCHEMA = `-- ==========================================================
+-- SHEET / TABEL MANDIRI: USER_ACCOUNTS (TERPISAH DARI SUKSESI)
+-- ==========================================================
+
+-- 1. Buat tabel user_accounts
+create table if not exists user_accounts (
+  id text primary key,
+  name text not null,
+  email text not null unique,
+  password text default 'password123',
+  role text not null default 'user',
+  title text default '',
+  department text default '',
+  status text not null default 'active',
+  linked_talent_id text,
+  avatar text,
+  initials text,
+  notes text,
+  last_login timestamp with time zone,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. Aktifkan Row Level Security (RLS)
+alter table user_accounts enable row level security;
+
+-- 3. Kebijakan akses baca dan tulis (publik/komite)
+drop policy if exists "Allow public read and write on user_accounts" on user_accounts;
+create policy "Allow public read and write on user_accounts" 
+on user_accounts 
+for all 
+using (true) 
+with check (true);
+
+-- 4. Berikan hak akses penuh ke role anon, authenticated, dan service_role
+grant all on user_accounts to anon, authenticated, service_role;`;
+
+export const SUCCESSION_DATA_SQL_SCHEMA = `-- ==========================================================
+-- SHEET / TABEL MANDIRI: SUCCESSION_DATA (DATA TALENTA SUKSESI)
+-- ==========================================================
+
+-- 1. Buat tabel penampung data suksesi
+create table if not exists succession_data (
+  id text primary key,
+  talents jsonb not null,
+  retiring_positions jsonb not null,
+  evaluation_years jsonb not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. Aktifkan Row Level Security (RLS)
+alter table succession_data enable row level security;
+
+-- 3. Izinkan akses baca dan tulis publik
+drop policy if exists "Allow public read and write" on succession_data;
+create policy "Allow public read and write" 
+on succession_data 
+for all 
+using (true) 
+with check (true);
+
+-- 4. Berikan izin akses penuh ke anon dan authenticated
+grant all on succession_data to anon, authenticated, service_role;`;
 
 const DEFAULT_URL = (import.meta as any).env.VITE_SUPABASE_URL || "https://lpdofcdffazatvczzzrj.supabase.co";
 const DEFAULT_ANON_KEY = (import.meta as any).env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwZG9mY2RmZmF6YXR2Y3p6enJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNDM0MjMsImV4cCI6MjA5OTkxOTQyM30.kmaFHE_SLs2603w0sKAPIe-LGB6DAjg6P-9jaI72Y3A";
@@ -219,5 +284,122 @@ export async function pullFromSupabase(): Promise<{
     };
   } catch (err: any) {
     return { success: false, error: err.message || "Unknown error occurred" };
+  }
+}
+
+/**
+ * Mengunggah data akun pengguna ke sheet/tabel tersendiri: "user_accounts" di Supabase.
+ * Menggunakan upsert berdasarkan id unik masing-masing akun.
+ */
+export async function pushUserAccountsToSupabase(
+  accounts: UserAccount[]
+): Promise<{ success: boolean; error?: string; count?: number }> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: "Koneksi Supabase belum diatur. Periksa Project URL dan Anon Key di Pengaturan." };
+  }
+
+  try {
+    const formattedRows = accounts.map((a) => ({
+      id: a.id,
+      name: a.name,
+      email: a.email,
+      password: a.password || "password123",
+      role: a.role,
+      title: a.title || "",
+      department: a.department || "",
+      status: a.status || "active",
+      linked_talent_id: a.linkedTalentId || null,
+      avatar: a.avatar || null,
+      initials: a.initials || null,
+      notes: a.notes || null,
+      last_login: a.lastLogin || null,
+      created_at: a.createdAt || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+
+    const { error } = await client
+      .from("user_accounts")
+      .upsert(formattedRows, { onConflict: "id" });
+
+    if (error) {
+      if (
+        error.message.includes('relation "user_accounts" does not exist') || 
+        error.message.includes("does not exist")
+      ) {
+        return {
+          success: false,
+          error: "Tabel/sheet 'user_accounts' belum dibuat di database Supabase Anda. Jalankan skrip SQL skema tabel 'user_accounts' di SQL Editor Supabase."
+        };
+      }
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, count: formattedRows.length };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Terjadi kesalahan saat mengunggah akun ke Supabase." };
+  }
+}
+
+/**
+ * Menarik seluruh data akun pengguna dari sheet/tabel tersendiri: "user_accounts" di Supabase.
+ */
+export async function pullUserAccountsFromSupabase(): Promise<{
+  success: boolean;
+  accounts?: UserAccount[];
+  error?: string;
+}> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: "Koneksi Supabase belum diatur. Periksa Project URL dan Anon Key di Pengaturan." };
+  }
+
+  try {
+    const { data, error } = await client
+      .from("user_accounts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      if (
+        error.message.includes('relation "user_accounts" does not exist') || 
+        error.message.includes("does not exist")
+      ) {
+        return {
+          success: false,
+          error: "Tabel/sheet 'user_accounts' belum dibuat di database Supabase Anda. Jalankan skrip SQL skema tabel 'user_accounts' di SQL Editor Supabase."
+        };
+      }
+      return { success: false, error: error.message };
+    }
+
+    if (!data || data.length === 0) {
+      return {
+        success: false,
+        error: "Belum ada data di tabel 'user_accounts' Supabase. Anda dapat melakukan 'Push Akun' dari data lokal terlebih dahulu untuk mengisi data awal."
+      };
+    }
+
+    const accounts: UserAccount[] = data.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      password: row.password || "password123",
+      role: row.role === "admin" ? "admin" : "user",
+      title: row.title || "",
+      department: row.department || "",
+      status: row.status === "inactive" ? "inactive" : "active",
+      linkedTalentId: row.linked_talent_id || undefined,
+      avatar: row.avatar || undefined,
+      initials: row.initials || undefined,
+      notes: row.notes || undefined,
+      lastLogin: row.last_login || undefined,
+      createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || new Date().toISOString()
+    }));
+
+    return { success: true, accounts };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Terjadi kesalahan saat menarik data akun pengguna dari Supabase." };
   }
 }

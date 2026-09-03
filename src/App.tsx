@@ -88,7 +88,7 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { MOCK_TALENTS } from "./data";
-import { TalentProfile, RetiringPosition, PotentialAssessment, PerformanceEvaluation, SavedFilter, TrainingItem, DeleteConfirmModalConfig, SupabaseNoticeModalConfig } from "./types";
+import { TalentProfile, RetiringPosition, PotentialAssessment, PerformanceEvaluation, SavedFilter, TrainingItem, DeleteConfirmModalConfig, SupabaseNoticeModalConfig, UserAccount } from "./types";
 import { FEMALE_AVATARS, MALE_AVATARS, detectGenderFromName, getSyncedAvatarUrl, compressImageFile } from "./utils/avatarUtils";
 import { Database } from "lucide-react";
 import { 
@@ -96,8 +96,19 @@ import {
   saveSupabaseConfig, 
   getSupabaseClient, 
   pushToSupabase, 
-  pullFromSupabase 
+  pullFromSupabase,
+  USER_ACCOUNTS_SQL_SCHEMA,
+  SUCCESSION_DATA_SQL_SCHEMA
 } from "./supabaseClient";
+import { 
+  loadUserAccounts, 
+  saveUserAccounts, 
+  authenticateUser, 
+  recordUserLogin, 
+  generateInitials, 
+  ACTIVE_SESSION_STORAGE_KEY 
+} from "./utils/userAccountDb";
+import { UserAccountManagement } from "./components/UserAccountManagement";
 
 
 const pageVariants = {
@@ -188,6 +199,23 @@ export default function App() {
   const [loginPassword, setLoginPassword] = useState("password123");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
+
+  // Integrated User Accounts Database State
+  const [userAccounts, setUserAccounts] = useState<UserAccount[]>(() => loadUserAccounts());
+  const [currentUserAccount, setCurrentUserAccount] = useState<UserAccount | null>(() => {
+    try {
+      const allAccs = loadUserAccounts();
+      const savedSessionId = typeof window !== "undefined" ? localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY) : null;
+      if (savedSessionId) {
+        const found = allAccs.find(a => a.id === savedSessionId);
+        if (found) return found;
+      }
+      return allAccs.find(a => a.role === "admin" && a.status === "active") || allAccs[0] || null;
+    } catch {
+      return null;
+    }
+  });
+  const [settingsSubTab, setSettingsSubTab] = useState<"user-accounts" | "advisory-config" | "integrations">("user-accounts");
 
   // Navigation states
   const [activeTab, setActiveTabRaw] = useState<"home" | "talent-pool" | "profile" | "settings" | "nine-box">("profile");
@@ -1283,12 +1311,54 @@ PT Ajinomoto Indonesia`,
       console.error("Gagal menyimpan adminProfile ke localStorage", err);
     }
 
+    // Two-way sync to user accounts database
+    const syncedAccounts = userAccounts.map(acc => {
+      if (acc.role === "admin" && (acc.id === currentUserAccount?.id || acc.email.toLowerCase() === adminProfile.email.toLowerCase())) {
+        return {
+          ...acc,
+          name: updatedProfile.name,
+          title: updatedProfile.title,
+          email: updatedProfile.email,
+          department: updatedProfile.department,
+          initials,
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return acc;
+    });
+    setUserAccounts(syncedAccounts);
+    saveUserAccounts(syncedAccounts);
+
     addSecurityLog(`Profil Administrator Master ("${updatedProfile.name}") berhasil diperbarui dan disimpan.`, "success");
     setAdminProfileSuccessMsg(`Profil Master Admin "${updatedProfile.name}" berhasil disimpan!`);
     setTimeout(() => setAdminProfileSuccessMsg(""), 4000);
 
     if (isAdminMasterModalOpen) {
       setIsAdminMasterModalOpen(false);
+    }
+  };
+
+  const handleAccountsChange = (updatedAccounts: UserAccount[]) => {
+    setUserAccounts(updatedAccounts);
+    saveUserAccounts(updatedAccounts);
+    
+    // Sync current logged in user if modified in table/modal
+    if (currentUserAccount) {
+      const foundCurrent = updatedAccounts.find(a => a.id === currentUserAccount.id);
+      if (foundCurrent) {
+        setCurrentUserAccount(foundCurrent);
+        setUserRole(foundCurrent.role);
+        if (foundCurrent.role === "admin") {
+          setAdminProfile(prev => ({
+            ...prev,
+            name: foundCurrent.name,
+            title: foundCurrent.title,
+            email: foundCurrent.email,
+            department: foundCurrent.department,
+            initials: foundCurrent.initials || generateInitials(foundCurrent.name)
+          }));
+        }
+      }
     }
   };
 
@@ -1419,6 +1489,7 @@ PT Ajinomoto Indonesia`,
   );
   const [supabaseError, setSupabaseError] = useState("");
   const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(false);
+  const [sqlSchemaTab, setSqlSchemaTab] = useState<"user_accounts" | "succession">("user_accounts");
 
   // Auto-load data from Supabase if enabled
   React.useEffect(() => {
@@ -4286,25 +4357,51 @@ grant all on succession_data to anon, authenticated, service_role;`
       setLoginError("");
 
       setTimeout(() => {
-        if (loginEmail === "admin@ajinomoto.com" && loginPassword === "password123") {
+        const result = authenticateUser(loginEmail, loginPassword, userAccounts);
+        if (result.success && result.account) {
+          const loggedAcc = result.account;
+          const { updatedAccounts, activeAccount } = recordUserLogin(loggedAcc.id, userAccounts);
+          setUserAccounts(updatedAccounts);
+          const current = activeAccount || loggedAcc;
+          setCurrentUserAccount(current);
+          setUserRole(current.role);
+          try {
+            localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, current.id);
+          } catch (err) {
+            console.error("Gagal simpan session", err);
+          }
+
+          if (current.role === "admin") {
+            setAdminProfile(prev => ({
+              ...prev,
+              name: current.name,
+              title: current.title,
+              email: current.email,
+              department: current.department,
+              initials: current.initials || generateInitials(current.name)
+            }));
+            setActiveTab("home");
+          } else {
+            if (current.linkedTalentId && talents.some(t => t.id === current.linkedTalentId)) {
+              setSelectedTalentId(current.linkedTalentId);
+            } else {
+              setSelectedTalentId("edwin-prasetyo");
+            }
+            setActiveTab("profile");
+          }
           setAuthState("authenticated");
-          setUserRole("admin");
-          setActiveTab("home");
-        } else if (loginEmail === "user@ajinomoto.com" && loginPassword === "password123") {
-          setAuthState("authenticated");
-          setUserRole("user");
-          setSelectedTalentId("edwin-prasetyo");
-          setActiveTab("profile");
+          addSecurityLog(`Autentikasi akun berhasil: ${current.name} (${current.email}) [${current.role.toUpperCase()}]`, "success");
         } else {
-          setLoginError("Email atau sandi yang Anda masukkan tidak valid.");
+          setLoginError(result.error || "Email atau kata sandi yang Anda masukkan tidak valid.");
         }
         setIsLoggingIn(false);
-      }, 1000);
+      }, 500);
     };
 
-    const fillCredentials = (role: "admin" | "user") => {
-      setLoginEmail(role === "admin" ? "admin@ajinomoto.com" : "user@ajinomoto.com");
-      setLoginPassword("password123");
+    const fillAccountCredentials = (account: UserAccount) => {
+      setLoginEmail(account.email);
+      setLoginPassword(account.password || "password123");
+      setLoginError("");
     };
 
     return (
@@ -4474,31 +4571,53 @@ grant all on succession_data to anon, authenticated, service_role;`
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">AKSES CEPAT PORTAL</span>
+                  <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">
+                    DATABASE AKUN PENGGUNA ({userAccounts.filter(a => a.status === "active").length} AKTIF)
+                  </span>
                 </div>
-                <span className="text-[9px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold px-1.5 py-0.2 rounded">DEMO</span>
+                <span className="text-[9px] bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-200 font-bold px-2 py-0.5 rounded border border-teal-200 dark:border-teal-800">
+                  AUTO-LOAD
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => fillCredentials("admin")}
-                  className="text-left p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100/60 dark:hover:bg-slate-700/80 rounded-xl border border-slate-200/60 dark:border-slate-700 transition-all group hover:border-slate-300 cursor-pointer"
-                >
-                  <span className="text-[9px] text-primary dark:text-teal-400 font-black block uppercase tracking-wide">AKSES ADMINISTRATOR</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-200 font-bold block truncate mt-0.5">admin@ajinomoto.com</span>
-                  <span className="text-[8px] text-slate-400 dark:text-slate-400 block font-medium mt-1 group-hover:text-primary dark:group-hover:text-teal-400 transition-colors">Klik untuk isi otomatis →</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => fillCredentials("user")}
-                  className="text-left p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100/60 dark:hover:bg-slate-700/80 rounded-xl border border-slate-200/60 dark:border-slate-700 transition-all group hover:border-slate-300 cursor-pointer"
-                >
-                  <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-black block uppercase tracking-wide">AKSES VIEW ONLY (EDWIN)</span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-200 font-bold block truncate mt-0.5">user@ajinomoto.com</span>
-                  <span className="text-[8px] text-slate-400 dark:text-slate-400 block font-medium mt-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Klik untuk isi otomatis →</span>
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+                {userAccounts
+                  .filter(acc => acc.status === "active")
+                  .map((acc) => (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => fillAccountCredentials(acc)}
+                      className={`text-left p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 rounded-xl border transition-all group cursor-pointer ${
+                        loginEmail.toLowerCase() === acc.email.toLowerCase()
+                          ? "border-primary dark:border-teal-400 ring-2 ring-primary/20 dark:ring-teal-400/20 shadow-xs"
+                          : "border-slate-200/60 dark:border-slate-700 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <span className={`text-[9px] font-black uppercase tracking-wide truncate ${
+                          acc.role === "admin" ? "text-primary dark:text-teal-400" : "text-indigo-600 dark:text-indigo-400"
+                        }`}>
+                          {acc.role === "admin" ? "ADMINISTRATOR" : "USER / KARYAWAN"}
+                        </span>
+                        <span className="text-[8px] font-mono font-bold px-1 py-0.2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded shrink-0">
+                          {acc.initials || generateInitials(acc.name)}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-900 dark:text-slate-100 font-bold block truncate mt-0.5">
+                        {acc.name}
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                        {acc.email}
+                      </span>
+                      <div className="flex items-center justify-between mt-1 text-[8px] text-slate-400 dark:text-slate-400">
+                        <span className="truncate">{acc.title}</span>
+                        <span className="font-semibold text-primary dark:text-teal-400 shrink-0 group-hover:translate-x-0.5 transition-transform">
+                          Pilih →
+                        </span>
+                      </div>
+                    </button>
+                  ))}
               </div>
             </div>
           </div>
@@ -4645,7 +4764,7 @@ grant all on succession_data to anon, authenticated, service_role;`
             title={isSidebarCollapsed ? `Administrator: ${userRole === "admin" ? adminProfile.name : "Edwin Prasetyo"} (Klik Edit)` : (userRole === "admin" ? "Klik untuk Edit & Simpan Profiling Admin Master" : "")}
           >
             <div className={`relative ${isSidebarCollapsed ? "w-10 h-10" : "w-10 h-10"} rounded-xl ${userRole === "admin" ? "bg-teal-700 dark:bg-teal-600 text-white dark:text-slate-950 ring-2 ring-teal-500/30 shadow-xs" : "bg-emerald-600 text-white ring-2 ring-emerald-500/30"} flex items-center justify-center font-display font-black text-sm shrink-0`}>
-              {userRole === "admin" ? adminProfile.initials : "EP"}
+              {currentUserAccount?.initials || (userRole === "admin" ? adminProfile.initials : "EP")}
               <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500 shadow-2xs"></span>
             </div>
 
@@ -4653,14 +4772,14 @@ grant all on succession_data to anon, authenticated, service_role;`
               <div className="flex-1 overflow-hidden text-left">
                 <div className="flex items-center justify-between gap-1">
                   <h2 className="font-display text-xs font-black text-slate-900 dark:text-slate-100 group-hover:text-teal-700 dark:group-hover:text-teal-300 truncate">
-                    {userRole === "admin" ? adminProfile.name : "Edwin Prasetyo"}
+                    {currentUserAccount?.name || (userRole === "admin" ? adminProfile.name : "Edwin Prasetyo")}
                   </h2>
                   {userRole === "admin" && (
                     <UserCog className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 group-hover:text-teal-700 dark:group-hover:text-teal-300 group-hover:rotate-45 transition-all shrink-0" />
                   )}
                 </div>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold truncate">
-                  {userRole === "admin" ? adminProfile.title : "Senior Candidate (User)"}
+                  {currentUserAccount?.title || (userRole === "admin" ? adminProfile.title : "Senior Candidate (User)")}
                 </p>
               </div>
             )}
@@ -8504,12 +8623,68 @@ grant all on succession_data to anon, authenticated, service_role;`
                   exit="exit"
                   className="space-y-6"
                 >
-                  <div className="border-b border-surface-container-highest pb-4">
-                    <h1 className="font-display text-2xl md:text-3xl font-extrabold text-primary">Advisory Portal Controls</h1>
-                    <p className="text-sm text-on-surface-variant">Configure talent matrix formulas, edit executive descriptions, and adjust system-wide calibration defaults.</p>
+                  <div className="border-b border-surface-container-highest pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h1 className="font-display text-2xl md:text-3xl font-extrabold text-primary">Advisory Portal Controls & Database</h1>
+                      <p className="text-sm text-on-surface-variant">Manajemen database akun pengguna, hak akses, kalibrasi matriks talenta, dan integrasi cloud terpusat.</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Database: LocalStorage Auto-Sync</span>
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Settings Navigation Subtabs */}
+                  <div className="flex flex-wrap items-center gap-2 border-b border-surface-container-highest pb-3">
+                    <button
+                      type="button"
+                      onClick={() => setSettingsSubTab("user-accounts")}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        settingsSubTab === "user-accounts"
+                          ? "bg-primary text-white shadow-sm ring-2 ring-primary/20"
+                          : "bg-surface text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface border border-surface-container-highest"
+                      }`}
+                    >
+                      <Users className="w-4 h-4" />
+                      <span>Database Akun Pengguna ({userAccounts.length})</span>
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-black ${
+                        settingsSubTab === "user-accounts" ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                      }`}>
+                        TERINTEGRASI
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSettingsSubTab("advisory-config")}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        settingsSubTab === "advisory-config"
+                          ? "bg-primary text-white shadow-sm ring-2 ring-primary/20"
+                          : "bg-surface text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface border border-surface-container-highest"
+                      }`}
+                    >
+                      <Sliders className="w-4 h-4" />
+                      <span>Konfigurasi Advisory & Kalibrasi</span>
+                    </button>
+                  </div>
+
+                  {settingsSubTab === "user-accounts" && (
+                    <UserAccountManagement
+                      accounts={userAccounts}
+                      onAccountsChange={handleAccountsChange}
+                      currentUserId={currentUserAccount?.id}
+                      talents={talents}
+                      onNotify={(msg, type) => {
+                        addSecurityLog(msg, type);
+                        setShortcutToast(msg);
+                      }}
+                    />
+                  )}
+
+                  {settingsSubTab === "advisory-config" && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* General Settings */}
                     <div className="lg:col-span-2 bg-white rounded-xl border border-surface-container-highest p-6 shadow-sm space-y-6">
                       <h3 className="font-display text-lg font-bold text-on-surface border-b border-surface-container-highest pb-3">Succession Configuration</h3>
@@ -9217,69 +9392,67 @@ grant all on succession_data to anon, authenticated, service_role;`
                           )}
                         </div>
 
-                        {/* SQL DDL INITIALIZATION SCRIPT CARD */}
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                            <span>SQL Inisialisasi Supabase (Copy-Paste ke SQL Editor)</span>
-                            <span className="text-[9px] font-extrabold text-primary uppercase">Skema Tabel succession_data</span>
-                          </label>
+                        {/* SQL DDL INITIALIZATION SCRIPT CARD (SEPARATE SHEETS) */}
+                        <div className="space-y-2 pt-1 border-t border-surface-container-highest/60">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <label className="text-[10px] font-black uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+                              <span>Skrip Inisialisasi SQL Supabase (Pilih Sheet)</span>
+                            </label>
+                            
+                            {/* Sheet Tabs */}
+                            <div className="flex items-center gap-1 bg-surface-container p-0.5 rounded-lg border border-outline/20 self-start sm:self-auto">
+                              <button
+                                type="button"
+                                onClick={() => setSqlSchemaTab("user_accounts")}
+                                className={`px-2.5 py-1 rounded text-[9px] font-black uppercase transition-all cursor-pointer ${
+                                  sqlSchemaTab === "user_accounts"
+                                    ? "bg-teal-600 text-white shadow-xs"
+                                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest"
+                                }`}
+                              >
+                                Sheet: user_accounts (Akun)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSqlSchemaTab("succession")}
+                                className={`px-2.5 py-1 rounded text-[9px] font-black uppercase transition-all cursor-pointer ${
+                                  sqlSchemaTab === "succession"
+                                    ? "bg-primary text-white shadow-xs"
+                                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest"
+                                }`}
+                              >
+                                Sheet: succession_data (Talenta)
+                              </button>
+                            </div>
+                          </div>
+
                           <div className="relative">
-                            <pre className="w-full bg-slate-950 text-emerald-400 font-mono text-[9px] p-3.5 rounded-xl shadow-inner border border-slate-800 max-h-[140px] overflow-y-auto text-left leading-normal select-all">
-{`-- 1. Buat tabel penampung data suksesi
-create table if not exists succession_data (
-  id text primary key,
-  talents jsonb not null,
-  retiring_positions jsonb not null,
-  evaluation_years jsonb not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- 2. Aktifkan Row Level Security (RLS)
-alter table succession_data enable row level security;
-
--- 3. Izinkan akses baca dan tulis anonim/publik untuk kebutuhan komite talent
-drop policy if exists "Allow public read and write" on succession_data;
-create policy "Allow public read and write" 
-on succession_data 
-for all 
-using (true) 
-with check (true);
-
--- 4. Berikan izin akses penuh ke anon dan authenticated
-grant all on succession_data to anon, authenticated, service_role;`}
+                            <pre className="w-full bg-slate-950 text-emerald-400 font-mono text-[9px] p-3.5 rounded-xl shadow-inner border border-slate-800 max-h-[150px] overflow-y-auto text-left leading-relaxed select-all">
+                              {sqlSchemaTab === "user_accounts" ? USER_ACCOUNTS_SQL_SCHEMA : SUCCESSION_DATA_SQL_SCHEMA}
                             </pre>
                             <button
                               type="button"
                               onClick={() => {
-                                navigator.clipboard.writeText(`create table if not exists succession_data (
-  id text primary key,
-  talents jsonb not null,
-  retiring_positions jsonb not null,
-  evaluation_years jsonb not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
-alter table succession_data enable row level security;
-
-drop policy if exists "Allow public read and write" on succession_data;
-
-create policy "Allow public read and write" 
-on succession_data 
-for all 
-using (true) 
-with check (true);
-
-grant all on succession_data to anon, authenticated, service_role;`);
-                                setShortcutToast("SQL Script berhasil disalin ke clipboard!");
+                                const codeToCopy = sqlSchemaTab === "user_accounts" ? USER_ACCOUNTS_SQL_SCHEMA : SUCCESSION_DATA_SQL_SCHEMA;
+                                navigator.clipboard.writeText(codeToCopy);
+                                setShortcutToast(`Skrip SQL sheet '${sqlSchemaTab === "user_accounts" ? "user_accounts" : "succession_data"}' berhasil disalin ke clipboard!`);
                               }}
-                              className="absolute top-2 right-2 bg-slate-800 hover:bg-slate-750 text-white text-[8px] font-black px-2 py-1 rounded border border-slate-700 cursor-pointer transition-all active:scale-95"
+                              className="absolute top-2 right-2 bg-slate-800 hover:bg-slate-700 text-white text-[8px] font-black px-2.5 py-1 rounded-md border border-slate-700 cursor-pointer transition-all active:scale-95 shadow-xs"
                             >
-                              SALIN SQL
+                              SALIN SQL {sqlSchemaTab === "user_accounts" ? "AKUN" : "SUKSESI"}
                             </button>
                           </div>
-                          <span className="text-[9px] text-on-surface-variant font-medium leading-relaxed block">
-                            *Catatan: Pastikan Anda menjalankan perintah SQL di atas di SQL Editor Supabase Anda terlebih dahulu agar sinkronisasi data dapat berjalan sempurna tanpa kegagalan izin.
-                          </span>
+                          
+                          <div className="flex items-center justify-between text-[9px] text-on-surface-variant font-medium">
+                            <span>
+                              {sqlSchemaTab === "user_accounts" 
+                                ? "* Sheet 'user_accounts' khusus menyimpan kredensial akun dan hak akses secara mandiri."
+                                : "* Sheet 'succession_data' khusus menampung profil talenta, posisi suksesi, dan histori evaluasi."}
+                            </span>
+                            <span className="text-[9px] font-bold text-teal-600 dark:text-teal-400">
+                              Tersimpan di Sheet Terpisah
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -9526,6 +9699,7 @@ grant all on succession_data to anon, authenticated, service_role;`);
                       </button>
                     </div>
                   </div>
+                  )}
                 </motion.div>
               )}
 
