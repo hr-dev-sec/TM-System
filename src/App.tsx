@@ -3974,26 +3974,6 @@ grant all on succession_data to anon, authenticated, service_role;`
                   <span>Pelajari Parameter Matrix</span>
                 </a>
               </div>
-
-              {/* Demo Credentials Helper Box */}
-              <div className="p-4 bg-slate-100 dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 max-w-lg space-y-2.5 shadow-xs">
-                <div className="flex items-center gap-2 text-[10px] font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wider">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Akses Cepat Pengujian Portal (Demo Account)</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-medium">
-                  <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-700">
-                    <span className="text-[9px] text-primary dark:text-teal-400 block font-black uppercase tracking-wider">AKSES FULL ADMIN</span>
-                    <span className="font-mono text-slate-900 dark:text-slate-100 font-bold block mt-0.5">admin@ajinomoto.com</span>
-                    <span className="font-mono text-slate-600 dark:text-slate-300 block text-[10px] mt-0.5">Sandi: password123</span>
-                  </div>
-                  <div className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-700">
-                    <span className="text-[9px] text-primary dark:text-teal-400 block font-black uppercase tracking-wider">AKSES VIEW ONLY (EDWIN)</span>
-                    <span className="font-mono text-slate-900 dark:text-slate-100 font-bold block mt-0.5">user@ajinomoto.com</span>
-                    <span className="font-mono text-slate-600 dark:text-slate-300 block text-[10px] mt-0.5">Sandi: password123</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right Column: Interactive Mockup */}
@@ -4893,12 +4873,12 @@ grant all on succession_data to anon, authenticated, service_role;`
           </div>
         </aside>
 
-        {/* Main Scrollable Content Area */}
-        <main className="flex-1 min-w-0 w-full md:h-full px-4 sm:px-6 md:px-8 py-6 pb-28 md:pb-8 bg-background md:overflow-y-auto overflow-x-hidden">
-          <div className="max-w-7xl w-full mx-auto space-y-6 min-w-0">
-
-            {/* Breadcrumbs & Actions Header (Desktop) */}
-            <div className="hidden md:flex justify-between items-center mb-2">
+        {/* Content Wrapper with Stagnant Desktop Header */}
+        <div className="flex-1 flex flex-col min-w-0 md:h-full overflow-hidden">
+          
+          {/* Stagnant Desktop Header Bar (Tetap di atas, tidak ikut ter-scroll) */}
+          <header className="hidden md:flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30 shrink-0 shadow-2xs">
+            <div className="max-w-7xl w-full mx-auto flex justify-between items-center">
               <div className="flex items-center gap-2 text-on-surface-variant text-sm font-medium">
                 {userRole === "admin" ? (
                   <>
@@ -4995,6 +4975,11 @@ grant all on succession_data to anon, authenticated, service_role;`
                 </button>
               </div>
             </div>
+          </header>
+
+          {/* Main Scrollable Content Area */}
+          <main className="flex-1 min-w-0 w-full px-4 sm:px-6 md:px-8 py-6 pb-28 md:pb-8 bg-background md:overflow-y-auto overflow-x-hidden">
+            <div className="max-w-7xl w-full mx-auto space-y-6 min-w-0">
 
             {/* TAB PANELS WITH ANIMATIONS */}
             <AnimatePresence mode="wait" custom={direction}>
@@ -11194,6 +11179,7 @@ grant all on succession_data to anon, authenticated, service_role;`
 
           </div>
         </main>
+      </div>
       </div>
 
       {/* Bottom Nav Bar (Mobile layout sticky bottom) */}
