@@ -97,6 +97,7 @@ import {
   getSupabaseClient, 
   pushToSupabase, 
   pullFromSupabase,
+  pushUserAccountsToSupabase,
   pullUserAccountsFromSupabase,
   USER_ACCOUNTS_SQL_SCHEMA,
   SUCCESSION_DATA_SQL_SCHEMA
@@ -1334,8 +1335,7 @@ PT Ajinomoto Indonesia`,
       }
       return acc;
     });
-    setUserAccounts(syncedAccounts);
-    saveUserAccounts(syncedAccounts);
+    handleAccountsChange(syncedAccounts);
 
     addSecurityLog(`Profil Administrator Master ("${updatedProfile.name}") berhasil diperbarui dan disimpan.`, "success");
     setAdminProfileSuccessMsg(`Profil Master Admin "${updatedProfile.name}" berhasil disimpan!`);
@@ -1367,6 +1367,20 @@ PT Ajinomoto Indonesia`,
           }));
         }
       }
+    }
+
+    // Auto-save changes directly to Supabase Cloud database in background
+    const config = getSupabaseConfig();
+    if (config.isEnabled && config.url && config.anonKey) {
+      pushUserAccountsToSupabase(updatedAccounts).then((res) => {
+        if (res.success) {
+          addSecurityLog(`Auto-sync Supabase: ${updatedAccounts.length} akun pengguna otomatis diselaraskan ke cloud database.`, "success");
+        } else {
+          console.warn("Auto-sync akun ke Supabase Cloud:", res.error);
+        }
+      }).catch(err => {
+        console.warn("Auto-sync akun ke Supabase error:", err);
+      });
     }
   };
 
@@ -1496,14 +1510,23 @@ PT Ajinomoto Indonesia`,
     getSupabaseConfig().isEnabled ? "idle" : "unconfigured"
   );
   const [supabaseError, setSupabaseError] = useState("");
-  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(false);
+  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem("supabase_auto_sync");
+      return saved !== null ? saved === "true" : true;
+    } catch {
+      return true;
+    }
+  });
   const [sqlSchemaTab, setSqlSchemaTab] = useState<"user_accounts" | "succession">("user_accounts");
+  const isInitialPullingRef = React.useRef(true);
 
   // Auto-load data from Supabase if enabled (Succession Data & User Accounts)
   React.useEffect(() => {
     const initSync = async () => {
       const config = getSupabaseConfig();
       if (config.isEnabled) {
+        isInitialPullingRef.current = true;
         setIsSupabaseSyncing(true);
         setSupabaseStatus("idle");
 
@@ -1550,19 +1573,25 @@ PT Ajinomoto Indonesia`,
         }
 
         setIsSupabaseSyncing(false);
+        setTimeout(() => {
+          isInitialPullingRef.current = false;
+        }, 1200);
+      } else {
+        isInitialPullingRef.current = false;
       }
     };
     initSync();
   }, []);
 
-  // Debounced Auto-sync on changes
+  // Debounced Auto-sync on succession database changes (talents, retiringPositions, evaluationYears)
   const isFirstRender = React.useRef(true);
   React.useEffect(() => {
-    if (isFirstRender.current) {
+    if (isFirstRender.current || isInitialPullingRef.current) {
       isFirstRender.current = false;
       return;
     }
-    if (isAutoSyncEnabled && supabaseConfig.isEnabled) {
+    const config = getSupabaseConfig();
+    if (isAutoSyncEnabled && config.isEnabled && config.url && config.anonKey) {
       const delayDebounce = setTimeout(async () => {
         setIsSupabaseSyncing(true);
         const res = await pushToSupabase(talents, retiringPositions, evaluationYears);
@@ -1571,10 +1600,10 @@ PT Ajinomoto Indonesia`,
           setSupabaseError("");
         } else {
           setSupabaseStatus("error");
-          setSupabaseError(res.error || "Auto-sync gagal");
+          setSupabaseError(res.error || "Auto-sync suksesi gagal");
         }
         setIsSupabaseSyncing(false);
-      }, 1000);
+      }, 800);
       return () => clearTimeout(delayDebounce);
     }
   }, [talents, retiringPositions, evaluationYears, isAutoSyncEnabled, supabaseConfig.isEnabled]);
@@ -1669,6 +1698,60 @@ grant all on succession_data to anon, authenticated, service_role;`
         "Gagal Mengunduh dari Supabase",
         res.error || "Gagal mengambil data dari Supabase.",
         "Pastikan URL & Anon Key valid, serta tabel 'succession_data' di Supabase telah diisi data."
+      );
+    }
+  };
+
+  const handlePushUserAccountsToSupabase = async () => {
+    setIsSupabaseSyncing(true);
+    showSupabasePopup(
+      "syncing",
+      "Mengunggah Akun Pengguna ke Supabase...",
+      "Sistem sedang menyinkronkan seluruh akun pengguna ke tabel 'user_accounts' di Supabase Cloud."
+    );
+    const res = await pushUserAccountsToSupabase(userAccounts);
+    setIsSupabaseSyncing(false);
+    if (res.success) {
+      addSecurityLog(`Berhasil mengunggah ${res.count ?? userAccounts.length} akun pengguna ke tabel 'user_accounts' Supabase.`, "success");
+      showSupabasePopup(
+        "success",
+        "Sinkronisasi Akun Berhasil!",
+        `Sebanyak ${res.count ?? userAccounts.length} akun pengguna telah tersimpan di tabel 'user_accounts' Supabase Cloud.`,
+        res.warning || undefined
+      );
+    } else {
+      showSupabasePopup(
+        "error",
+        "Gagal Menyinkronkan Akun Pengguna",
+        res.error || "Gagal mengunggah akun ke Supabase.",
+        "Pastikan tabel 'user_accounts' sudah dibuat di Supabase SQL Editor."
+      );
+    }
+  };
+
+  const handlePullUserAccountsFromSupabase = async () => {
+    setIsSupabaseSyncing(true);
+    showSupabasePopup(
+      "syncing",
+      "Mengunduh Akun Pengguna dari Supabase...",
+      "Sistem sedang mengambil data akun pengguna terbaru dari tabel 'user_accounts' di Supabase Cloud."
+    );
+    const res = await pullUserAccountsFromSupabase();
+    setIsSupabaseSyncing(false);
+    if (res.success && res.accounts) {
+      saveUserAccounts(res.accounts);
+      setUserAccounts(res.accounts);
+      addSecurityLog(`Berhasil memuat ${res.accounts.length} akun pengguna dari Supabase Cloud.`, "success");
+      showSupabasePopup(
+        "success",
+        "Data Akun Berhasil Diambil!",
+        `Sebanyak ${res.accounts.length} akun pengguna berhasil dimuat ke database lokal.`
+      );
+    } else {
+      showSupabasePopup(
+        "error",
+        "Gagal Mengambil Akun Pengguna",
+        res.error || "Gagal menarik data akun dari Supabase."
       );
     }
   };
@@ -9366,10 +9449,14 @@ grant all on succession_data to anon, authenticated, service_role;`
                                   <button 
                                     type="button"
                                     onClick={() => {
-                                      setIsAutoSyncEnabled(!isAutoSyncEnabled);
-                                      addSecurityLog(`Auto-sync Supabase ${!isAutoSyncEnabled ? 'diaktifkan' : 'dinonaktifkan'}.`, "info");
+                                      const next = !isAutoSyncEnabled;
+                                      setIsAutoSyncEnabled(next);
+                                      try {
+                                        localStorage.setItem("supabase_auto_sync", String(next));
+                                      } catch (e) {}
+                                      addSecurityLog(`Auto-sync Supabase ${next ? 'diaktifkan' : 'dinonaktifkan'}.`, "info");
                                     }}
-                                    className={`w-12 h-6 rounded-full p-0.5 transition-colors focus:outline-none ${isAutoSyncEnabled ? 'bg-emerald-600' : 'bg-outline-variant'}`}
+                                    className={`w-12 h-6 rounded-full p-0.5 transition-colors focus:outline-none cursor-pointer ${isAutoSyncEnabled ? 'bg-emerald-600' : 'bg-outline-variant'}`}
                                   >
                                     <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${isAutoSyncEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
                                   </button>
@@ -9387,23 +9474,51 @@ grant all on succession_data to anon, authenticated, service_role;`
 
                           {supabaseConfig.isEnabled && (
                             <div className="pt-2 border-t border-slate-200/60 text-left space-y-3">
-                              <span className="text-[10px] font-black uppercase tracking-wider text-on-surface-variant block">Aksi Sinkronisasi Manual</span>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-on-surface-variant block">Aksi Sinkronisasi Manual</span>
+                                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  Auto-Save Cloud Aktif: Tersimpan Otomatis Tanpa Perlu Push
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                 <button
                                   type="button"
                                   disabled={isSupabaseSyncing}
                                   onClick={handlePushToSupabase}
-                                  className="py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-extrabold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50 font-display"
+                                  className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-extrabold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 font-display"
+                                  title="Push manual seluruh data talenta, posisi suksesi, dan tahun evaluasi"
                                 >
-                                  {isSupabaseSyncing ? "Menyinkronkan..." : "Push Data ke Supabase"}
+                                  <Database className="w-3.5 h-3.5 text-amber-600" />
+                                  <span>{isSupabaseSyncing ? "Menyinkronkan..." : "Push Data Suksesi ke Supabase"}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isSupabaseSyncing}
+                                  onClick={handlePushUserAccountsToSupabase}
+                                  className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-teal-300 text-teal-800 font-extrabold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 font-display"
+                                  title="Push manual seluruh data akun pengguna ke tabel user_accounts"
+                                >
+                                  <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+                                  <span>{isSupabaseSyncing ? "Menyinkronkan..." : "Push Akun Pengguna ke Supabase"}</span>
                                 </button>
                                 <button
                                   type="button"
                                   disabled={isSupabaseSyncing}
                                   onClick={handlePullFromSupabase}
-                                  className="py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-extrabold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50 font-display"
+                                  className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-extrabold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 font-display"
+                                  title="Tarik ulang data suksesi dari cloud database"
                                 >
-                                  {isSupabaseSyncing ? "Menyinkronkan..." : "Pull Data dari Supabase"}
+                                  <span>{isSupabaseSyncing ? "Menyinkronkan..." : "Pull Data Suksesi dari Supabase"}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isSupabaseSyncing}
+                                  onClick={handlePullUserAccountsFromSupabase}
+                                  className="py-2.5 px-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-extrabold text-xs rounded-lg flex items-center justify-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 font-display"
+                                  title="Tarik ulang data akun dari tabel user_accounts"
+                                >
+                                  <span>{isSupabaseSyncing ? "Menyinkronkan..." : "Pull Akun Pengguna dari Supabase"}</span>
                                 </button>
                               </div>
                             </div>

@@ -266,6 +266,13 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
     onAccountsChange(updatedList);
     setLastSavedTime(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
     setIsFormModalOpen(false);
+
+    if (supabaseConfig.isEnabled && supabaseConfig.url && supabaseConfig.anonKey) {
+      setSupabaseSyncMessage({
+        text: `Akun '${cleanName}' otomatis tersimpan dan diselaraskan ke database Supabase Cloud (Sheet user_accounts).`,
+        type: "success"
+      });
+    }
   };
 
   const handleToggleStatus = (acc: UserAccount) => {
@@ -281,6 +288,13 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
     onAccountsChange(updated);
     setLastSavedTime(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
     onNotify?.(`Status akun ${acc.name} diubah menjadi ${nextStatus === "active" ? "Aktif" : "Non-Aktif"}.`, "info");
+
+    if (supabaseConfig.isEnabled && supabaseConfig.url && supabaseConfig.anonKey) {
+      setSupabaseSyncMessage({
+        text: `Status akun '${acc.name}' (${nextStatus === "active" ? "Aktif" : "Non-Aktif"}) otomatis tersimpan ke database Supabase Cloud.`,
+        type: "success"
+      });
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -581,12 +595,13 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
               <code className="bg-teal-950/80 px-2 py-0.5 rounded text-teal-200 text-xs font-mono font-bold border border-teal-700/50">
                 user_accounts
               </code>
-              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tracking-wider uppercase">
-                100% Terpisah Dari succession_data
+              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tracking-wider uppercase inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Auto-Save Cloud Aktif
               </span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-              Data akun dan hak akses pengguna disimpan di sheet/tabel tersendiri (<strong className="text-white">user_accounts</strong>) di database Supabase Cloud. Struktur tabel ini terisolasi sepenuhnya dari sheet <strong className="text-teal-200">succession_data</strong> agar pemeliharaan hak akses lebih rapi dan aman.
+              Data akun dan hak akses disimpan di tabel mandiri (<strong className="text-white">user_accounts</strong>) di Supabase Cloud. Setiap penambahan, pembaruan status, profil, atau penghapusan akun <strong>langsung tersimpan otomatis ke cloud database</strong> tanpa harus menekan tombol Push terlebih dahulu. Tombol push manual tetap tersedia di bawah jika Anda ingin sinkronisasi paksa.
             </p>
           </div>
 
