@@ -4713,7 +4713,7 @@ grant all on succession_data to anon, authenticated, service_role;`
       </header>
 
       {/* Main Container */}
-      <div className="flex flex-1 min-h-[calc(100vh-60px)] md:min-h-screen relative">
+      <div className="flex flex-1 min-h-[calc(100vh-60px)] md:min-h-screen relative w-full min-w-0 overflow-x-hidden">
         
         {/* Navigation Drawer (Desktop Sidebar with Collapse/Expand support) */}
         <aside className={`hidden md:flex flex-col ${isSidebarCollapsed ? "w-[76px] p-2.5" : "w-[280px] p-4"} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-none space-y-2 z-40 flex-shrink-0 sticky top-0 h-screen overflow-y-auto transition-all duration-300 ease-in-out`}>
@@ -4954,8 +4954,8 @@ grant all on succession_data to anon, authenticated, service_role;`
         </aside>
 
         {/* Main Scrollable Content Area */}
-        <main className="flex-1 px-5 md:px-8 py-6 pb-28 md:pb-8 bg-background">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 min-w-0 w-full px-4 sm:px-6 md:px-8 py-6 pb-28 md:pb-8 bg-background overflow-x-hidden">
+          <div className="max-w-7xl w-full mx-auto space-y-6 min-w-0">
 
             {/* Breadcrumbs & Actions Header (Desktop) */}
             <div className="hidden md:flex justify-between items-center mb-2">
@@ -8623,13 +8623,13 @@ grant all on succession_data to anon, authenticated, service_role;`
                   exit="exit"
                   className="space-y-6"
                 >
-                  <div className="border-b border-surface-container-highest pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <h1 className="font-display text-2xl md:text-3xl font-extrabold text-primary">Advisory Portal Controls & Database</h1>
-                      <p className="text-sm text-on-surface-variant">Manajemen database akun pengguna, hak akses, kalibrasi matriks talenta, dan integrasi cloud terpusat.</p>
+                  <div className="border-b border-surface-container-highest pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="min-w-0 flex-1">
+                      <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-primary tracking-tight">Advisory Portal Controls & Database</h1>
+                      <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">Manajemen database akun pengguna, hak akses, kalibrasi matriks talenta, dan integrasi cloud terpusat.</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs">
+                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                      <span className="text-[10px] sm:text-[11px] font-bold px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Database: LocalStorage Auto-Sync</span>
                       </span>

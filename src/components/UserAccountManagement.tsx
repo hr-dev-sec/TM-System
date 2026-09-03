@@ -424,17 +424,17 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
   };
 
   return (
-    <div id="user-accounts-database-manager" className="space-y-6">
+    <div id="user-accounts-database-manager" className="space-y-6 w-full min-w-0">
       {/* Header Banner & Stats */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-primary/90 text-white rounded-2xl p-6 sm:p-7 shadow-sm border border-slate-700/60 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-primary/90 text-white rounded-2xl p-5 sm:p-6 lg:p-7 shadow-sm border border-slate-700/60 relative overflow-hidden w-full">
         <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-1.5 text-left">
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+          <div className="space-y-1.5 text-left flex-1 min-w-0">
             <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase backdrop-blur-xs border border-white/15">
-              <ShieldCheck className="w-3.5 h-3.5 text-teal-300" />
-              <span>Sistem Manajemen Akun Terintegrasi</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <ShieldCheck className="w-3.5 h-3.5 text-teal-300 shrink-0" />
+              <span className="truncate">Sistem Manajemen Akun Terintegrasi</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
             </div>
             <h3 className="font-display text-xl sm:text-2xl font-black tracking-tight text-white">
               Database Akun Pengguna & Hak Akses
@@ -445,32 +445,32 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95"
+              className="bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95 whitespace-nowrap"
             >
-              <UserPlus className="w-4 h-4" />
+              <UserPlus className="w-4 h-4 shrink-0" />
               <span>Tambah Akun Baru</span>
             </button>
 
             <button
               type="button"
               onClick={handleExportJson}
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
               title="Ekspor seluruh akun ke format JSON"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 shrink-0" />
               <span>Ekspor JSON</span>
             </button>
 
             <label
               htmlFor={importFileInputId}
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
               title="Impor akun dari file JSON"
             >
-              <Upload className="w-3.5 h-3.5" />
+              <Upload className="w-3.5 h-3.5 shrink-0" />
               <span>Impor JSON</span>
               <input
                 id={importFileInputId}
@@ -484,47 +484,47 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
         </div>
 
         {/* Metric Counters Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/15">
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left">
-            <span className="text-[10px] font-bold text-slate-300 uppercase block">Total Pengguna</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/15">
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left min-w-0">
+            <span className="text-[10px] font-bold text-slate-300 uppercase block truncate">Total Pengguna</span>
             <div className="flex items-baseline gap-2 mt-0.5">
               <span className="font-display text-2xl font-black text-white">{accounts.length}</span>
-              <span className="text-[10px] text-slate-400">Akun Terdaftar</span>
+              <span className="text-[10px] text-slate-400 truncate">Akun Terdaftar</span>
             </div>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left">
-            <span className="text-[10px] font-bold text-teal-300 uppercase block">Administrator Aktif</span>
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left min-w-0">
+            <span className="text-[10px] font-bold text-teal-300 uppercase block truncate">Administrator Aktif</span>
             <div className="flex items-baseline gap-2 mt-0.5">
               <span className="font-display text-2xl font-black text-teal-300">{totalAdmins}</span>
-              <span className="text-[10px] text-slate-400">Akses Penuh</span>
+              <span className="text-[10px] text-slate-400 truncate">Akses Penuh</span>
             </div>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left">
-            <span className="text-[10px] font-bold text-sky-300 uppercase block">User / Karyawan</span>
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left min-w-0">
+            <span className="text-[10px] font-bold text-sky-300 uppercase block truncate">User / Karyawan</span>
             <div className="flex items-baseline gap-2 mt-0.5">
               <span className="font-display text-2xl font-black text-sky-300">{totalUsers}</span>
-              <span className="text-[10px] text-slate-400">Talent / Viewer</span>
+              <span className="text-[10px] text-slate-400 truncate">Talent / Viewer</span>
             </div>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left">
-            <span className="text-[10px] font-bold text-emerald-300 uppercase block">Status Database</span>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-bold text-emerald-300">Tersimpan ({lastSavedTime})</span>
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-left min-w-0">
+            <span className="text-[10px] font-bold text-emerald-300 uppercase block truncate">Status Database</span>
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="text-[11px] font-bold text-emerald-300 truncate">Tersimpan ({lastSavedTime})</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* SUPABASE DEDICATED SHEET: user_accounts SYNC PANEL */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-teal-950 text-white rounded-2xl p-5 shadow-sm border border-teal-600/30 relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1.5 text-left">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-teal-950 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-teal-600/30 relative overflow-hidden w-full">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          <div className="space-y-1.5 text-left flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Database className="w-4 h-4 text-teal-400" />
+              <Database className="w-4 h-4 text-teal-400 shrink-0" />
               <span className="text-xs font-black tracking-wide uppercase text-teal-300">
                 Sheet / Tabel Mandiri Supabase:
               </span>
@@ -540,15 +540,15 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               disabled={isSupabasePushing || isSupabasePulling}
               onClick={handlePushToSupabase}
-              className="bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
               title="Unggah akun lokal ke tabel mandiri user_accounts di Supabase"
             >
-              <CloudUpload className={`w-4 h-4 ${isSupabasePushing ? 'animate-bounce' : ''}`} />
+              <CloudUpload className={`w-4 h-4 shrink-0 ${isSupabasePushing ? 'animate-bounce' : ''}`} />
               <span>{isSupabasePushing ? "Mengunggah..." : "Push Akun ke Supabase"}</span>
             </button>
 
@@ -556,20 +556,20 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
               type="button"
               disabled={isSupabasePushing || isSupabasePulling}
               onClick={handlePullFromSupabase}
-              className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white border border-white/20 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white border border-white/20 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
               title="Tarik akun dari tabel mandiri user_accounts di Supabase"
             >
-              <CloudDownload className={`w-4 h-4 ${isSupabasePulling ? 'animate-bounce' : ''}`} />
+              <CloudDownload className={`w-4 h-4 shrink-0 ${isSupabasePulling ? 'animate-bounce' : ''}`} />
               <span>{isSupabasePulling ? "Menarik..." : "Tarik Akun dari Supabase"}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsSqlModalOpen(true)}
-              className="bg-teal-950/80 hover:bg-teal-900 text-teal-200 border border-teal-700/60 font-bold text-xs px-3 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-teal-950/80 hover:bg-teal-900 text-teal-200 border border-teal-700/60 font-bold text-xs px-3 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
               title="Buka skrip DDL SQL untuk membuat sheet user_accounts"
             >
-              <Code2 className="w-4 h-4 text-teal-300" />
+              <Code2 className="w-4 h-4 text-teal-300 shrink-0" />
               <span>Skrip SQL user_accounts</span>
             </button>
           </div>
@@ -608,8 +608,8 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-surface-container-highest dark:border-slate-800 p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <div className="relative flex-1">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-surface-container-highest dark:border-slate-800 p-3.5 sm:p-4 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full min-w-0">
+        <div className="relative flex-1 min-w-0">
           <label htmlFor={searchInputId} className="sr-only">Cari Pengguna</label>
           <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
           <input
@@ -631,7 +631,7 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
             <label htmlFor={roleFilterId} className="text-[10px] font-bold text-slate-500 uppercase">Role:</label>
             <select
@@ -673,9 +673,9 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
       </div>
 
       {/* User Accounts Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-surface-container-highest dark:border-slate-800 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-surface-container-highest dark:border-slate-800 shadow-xs overflow-hidden w-full min-w-0">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-surface-container-highest dark:border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <th className="py-3.5 px-4">Pengguna</th>
