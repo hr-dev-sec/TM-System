@@ -1,4 +1,4 @@
-import React, { useState, useId } from "react";
+import React, { useState, useId, useEffect } from "react";
 import { 
   UserAccount, 
   TalentProfile 
@@ -106,6 +106,21 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
   const [isSqlCopied, setIsSqlCopied] = useState(false);
   const [supabaseSyncMessage, setSupabaseSyncMessage] = useState<{ text: string; type: "success" | "error" | "info" } | null>(null);
   const supabaseConfig = getSupabaseConfig();
+
+  // Auto-refresh accounts from Supabase Cloud on component mount so all changes from other webs/devices load automatically
+  useEffect(() => {
+    if (supabaseConfig.isEnabled && supabaseConfig.url && supabaseConfig.anonKey) {
+      pullUserAccountsFromSupabase().then((res) => {
+        if (res.success && res.accounts && res.accounts.length > 0) {
+          saveUserAccounts(res.accounts);
+          onAccountsChange(res.accounts);
+          setLastSavedTime(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
+        }
+      }).catch((err) => {
+        console.warn("Auto-sync accounts in UserAccountManagement failed:", err);
+      });
+    }
+  }, []);
 
   // Filter accounts
   const filteredAccounts = accounts.filter((acc) => {

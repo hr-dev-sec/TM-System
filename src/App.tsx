@@ -97,6 +97,7 @@ import {
   getSupabaseClient, 
   pushToSupabase, 
   pullFromSupabase,
+  pullUserAccountsFromSupabase,
   USER_ACCOUNTS_SQL_SCHEMA,
   SUCCESSION_DATA_SQL_SCHEMA
 } from "./supabaseClient";
@@ -192,12 +193,10 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  // Clean URL hashes (#fitur, #metodologi) from address bar if present
+  // Clean any URL hash (#) from address bar automatically to keep URL clean (e.g. tm-system-wine.vercel.app/)
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash) {
-      if (window.location.hash === "#fitur" || window.location.hash === "#metodologi") {
-        window.history.replaceState(null, "", window.location.pathname + window.location.search);
-      }
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
     }
   }, []);
 
@@ -1500,13 +1499,15 @@ PT Ajinomoto Indonesia`,
   const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(false);
   const [sqlSchemaTab, setSqlSchemaTab] = useState<"user_accounts" | "succession">("user_accounts");
 
-  // Auto-load data from Supabase if enabled
+  // Auto-load data from Supabase if enabled (Succession Data & User Accounts)
   React.useEffect(() => {
     const initSync = async () => {
       const config = getSupabaseConfig();
       if (config.isEnabled) {
         setIsSupabaseSyncing(true);
         setSupabaseStatus("idle");
+
+        // 1. Auto-load Succession Data
         const res = await pullFromSupabase();
         if (res.success && res.data) {
           if (res.data.talents && res.data.talents.length > 0) {
@@ -1519,12 +1520,35 @@ PT Ajinomoto Indonesia`,
             setEvaluationYears(res.data.evaluation_years);
           }
           setSupabaseStatus("success");
-          addSecurityLog("Berhasil sinkronisasi dan memuat data otomatis dari database Supabase.", "success");
+          addSecurityLog("Berhasil sinkronisasi dan memuat data suksesi otomatis dari database Supabase.", "success");
         } else {
           setSupabaseStatus("error");
           setSupabaseError(res.error || "Gagal memuat data.");
-          addSecurityLog(`Koneksi Supabase aktif namun gagal menarik data otomatis: ${res.error || 'Tabel belum siap'}. Silakan periksa tabel atau lakukan push data pertama kali.`, "warning");
+          addSecurityLog(`Koneksi Supabase aktif namun gagal menarik data suksesi otomatis: ${res.error || 'Tabel belum siap'}.`, "warning");
         }
+
+        // 2. Auto-load User Accounts from Supabase Cloud ("user_accounts" table)
+        try {
+          const accRes = await pullUserAccountsFromSupabase();
+          if (accRes.success && accRes.accounts && accRes.accounts.length > 0) {
+            saveUserAccounts(accRes.accounts);
+            setUserAccounts(accRes.accounts);
+
+            // Sync currently logged in session account if exists
+            const savedSessionId = typeof window !== "undefined" ? localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY) : null;
+            if (savedSessionId) {
+              const found = accRes.accounts.find(a => a.id === savedSessionId);
+              if (found) {
+                setCurrentUserAccount(found);
+                setUserRole(found.role);
+              }
+            }
+            addSecurityLog(`Database akun pengguna (${accRes.accounts.length} akun) berhasil termuat otomatis dari database Supabase Cloud.`, "success");
+          }
+        } catch (accErr) {
+          console.warn("Auto-load user accounts from Supabase failed:", accErr);
+        }
+
         setIsSupabaseSyncing(false);
       }
     };
@@ -3918,11 +3942,31 @@ grant all on succession_data to anon, authenticated, service_role;`
               </div>
             </div>
 
-            {/* Middle Status Indicator */}
-            <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-100">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-slate-700 dark:text-slate-100 font-extrabold">Akses HR Internal</span>
-            </div>
+            {/* Middle Nav Buttons (Tanpa # di URL, menggunakan smooth scroll murni) */}
+            <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-700 dark:text-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById("section-metodologi")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-slate-700 dark:text-slate-100 hover:text-primary dark:hover:text-teal-400 transition-colors cursor-pointer bg-transparent border-0 p-0 font-bold"
+              >
+                Metodologi Asesmen
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById("section-governance")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-slate-700 dark:text-slate-100 hover:text-primary dark:hover:text-teal-400 transition-colors cursor-pointer bg-transparent border-0 p-0 font-bold"
+              >
+                Pilar Evaluasi
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-slate-700 dark:text-slate-100 font-extrabold">Akses HR Internal</span>
+              </div>
+            </nav>
             
             <div className="flex items-center gap-3">
               {/* Dark Mode Toggle Button */}
@@ -4330,9 +4374,27 @@ grant all on succession_data to anon, authenticated, service_role;`
               <span className="font-semibold text-slate-700 dark:text-slate-200">© {new Date().getFullYear()} PT Ajinomoto Indonesia. Succession Strategy Board.</span>
             </div>
             <div className="flex gap-4 font-bold text-slate-700 dark:text-slate-200">
-              <a href="#" className="hover:text-primary dark:hover:text-teal-400 transition-colors">Panduan Sistem</a>
-              <a href="#" className="hover:text-primary dark:hover:text-teal-400 transition-colors">Kerahasiaan Data</a>
-              <a href="#" className="hover:text-primary dark:hover:text-teal-400 transition-colors">HR Support</a>
+              <button 
+                type="button" 
+                onClick={() => addSecurityLog("Panduan Penggunaan Sistem: Panduan lengkap suksesi tersedia melalui tim HR Ajinomoto.", "info")} 
+                className="hover:text-primary dark:hover:text-teal-400 transition-colors bg-transparent border-0 p-0 text-[11px] cursor-pointer font-bold"
+              >
+                Panduan Sistem
+              </button>
+              <button 
+                type="button" 
+                onClick={() => addSecurityLog("Kerahasiaan Data: Seluruh data suksesi dilindungi enkripsi AES-GCM.", "info")} 
+                className="hover:text-primary dark:hover:text-teal-400 transition-colors bg-transparent border-0 p-0 text-[11px] cursor-pointer font-bold"
+              >
+                Kerahasiaan Data
+              </button>
+              <button 
+                type="button" 
+                onClick={() => addSecurityLog("HR Support: Hubungi tim HCM di hcm.support@ajinomoto.com", "info")} 
+                className="hover:text-primary dark:hover:text-teal-400 transition-colors bg-transparent border-0 p-0 text-[11px] cursor-pointer font-bold"
+              >
+                HR Support
+              </button>
             </div>
           </div>
         </footer>
@@ -4341,25 +4403,41 @@ grant all on succession_data to anon, authenticated, service_role;`
   }
 
   if (authState === "login") {
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsLoggingIn(true);
       setLoginError("");
 
-      setTimeout(() => {
-        const result = authenticateUser(loginEmail, loginPassword, userAccounts);
-        if (result.success && result.account) {
-          const loggedAcc = result.account;
-          const { updatedAccounts, activeAccount } = recordUserLogin(loggedAcc.id, userAccounts);
-          setUserAccounts(updatedAccounts);
-          const current = activeAccount || loggedAcc;
-          setCurrentUserAccount(current);
-          setUserRole(current.role);
-          try {
-            localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, current.id);
-          } catch (err) {
-            console.error("Gagal simpan session", err);
+      let accountsPool = userAccounts;
+
+      // Otomatis sinkronisasi akun pengguna terbaru dari Supabase Cloud sebelum autentikasi
+      const config = getSupabaseConfig();
+      if (config.isEnabled && config.url && config.anonKey) {
+        try {
+          const freshRes = await pullUserAccountsFromSupabase();
+          if (freshRes.success && freshRes.accounts && freshRes.accounts.length > 0) {
+            accountsPool = freshRes.accounts;
+            setUserAccounts(freshRes.accounts);
+            saveUserAccounts(freshRes.accounts);
           }
+        } catch {
+          // fallback to current pool
+        }
+      }
+
+      const result = authenticateUser(loginEmail, loginPassword, accountsPool);
+      if (result.success && result.account) {
+        const loggedAcc = result.account;
+        const { updatedAccounts, activeAccount } = recordUserLogin(loggedAcc.id, accountsPool);
+        setUserAccounts(updatedAccounts);
+        const current = activeAccount || loggedAcc;
+        setCurrentUserAccount(current);
+        setUserRole(current.role);
+        try {
+          localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, current.id);
+        } catch (err) {
+          console.error("Gagal simpan session", err);
+        }
 
           if (current.role === "admin") {
             setAdminProfile(prev => ({
@@ -4385,7 +4463,6 @@ grant all on succession_data to anon, authenticated, service_role;`
           setLoginError(result.error || "Email atau kata sandi yang Anda masukkan tidak valid.");
         }
         setIsLoggingIn(false);
-      }, 500);
     };
 
     return (
@@ -4515,7 +4592,13 @@ grant all on succession_data to anon, authenticated, service_role;`
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <label className="text-[11px] font-black text-slate-700 dark:text-slate-200 block uppercase tracking-wider">Kata Sandi</label>
-                  <a href="#" className="text-[10px] text-slate-400 dark:text-slate-400 hover:text-primary dark:hover:text-teal-400 font-bold">Lupa Sandi?</a>
+                  <button 
+                    type="button" 
+                    onClick={() => setLoginError("Untuk bantuan reset kata sandi, silakan hubungi Tim Administrator HR Ajinomoto.")}
+                    className="text-[10px] text-slate-400 dark:text-slate-400 hover:text-primary dark:hover:text-teal-400 font-bold bg-transparent border-0 p-0 cursor-pointer"
+                  >
+                    Lupa Sandi?
+                  </button>
                 </div>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
