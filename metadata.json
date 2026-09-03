@@ -1,0 +1,6 @@
+{
+  "name": "Talent Advisor",
+  "description": "A premium, elegant corporate talent assessment and profile dashboard for strategic planning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

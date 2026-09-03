@@ -1,0 +1,407 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  --primary: #005454;
+  --primary-container: #0d6e6e;
+  --on-primary-container: #9dedec;
+  --secondary: #496174;
+  --background: #f7faf9;
+  --on-background: #181c1c;
+  --surface: #ffffff;
+  --on-surface: #181c1c;
+  --on-surface-variant: #3e4948;
+  --surface-container-high: #f1f5f9;
+  --surface-container-lowest: #ffffff;
+  --surface-container-highest: #e0e3e2;
+  --primary-fixed: #a0f0f0;
+  --primary-fixed-dim: #84d4d3;
+  --outline: #6e7979;
+  --outline-variant: #bec9c8;
+}
+
+.dark {
+  --primary: #2dd4bf; /* modern eye-friendly teal */
+  --primary-container: #0f172a;
+  --on-primary-container: #2dd4bf;
+  --secondary: #cbd5e1;
+  --background: #0f172a; /* deep, eye-friendly navy slate */
+  --on-background: #f8fafc;
+  --surface: #1e293b; /* solid slate-800 for modals & cards */
+  --on-surface: #f8fafc;
+  --on-surface-variant: #cbd5e1;
+  --surface-container-high: #334155;
+  --surface-container-lowest: #1e293b; /* slate-800 for cards */
+  --surface-container-highest: #334155; /* slate-700 for active states */
+  --primary-fixed: #1e293b;
+  --primary-fixed-dim: #0f172a;
+  --outline: #94a3b8;
+  --outline-variant: #334155;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Manrope", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-background text-on-background antialiased transition-colors duration-200;
+  }
+}
+
+/* Explicit solid opacity for surface elements & modal cards */
+.bg-surface {
+  background-color: var(--surface) !important;
+}
+.dark .bg-surface {
+  background-color: #1e293b !important;
+}
+
+/* Background overrides in dark mode to seamlessly support hardcoded Tailwind classes */
+.dark .bg-white {
+  background-color: var(--surface-container-lowest) !important;
+}
+.dark .bg-slate-50 {
+  background-color: var(--background) !important;
+}
+.dark .bg-slate-100 {
+  background-color: var(--surface-container-lowest) !important;
+}
+.dark .bg-slate-200 {
+  background-color: var(--surface-container-highest) !important;
+}
+.dark .bg-slate-700 {
+  background-color: var(--surface-container-lowest) !important;
+}
+.dark .bg-slate-800 {
+  background-color: var(--surface-container-highest) !important;
+}
+.dark .bg-slate-900 {
+  background-color: var(--background) !important;
+}
+
+/* Text color overrides in dark mode for maximum legibility */
+.dark .text-slate-950 {
+  color: #f8fafc !important;
+}
+.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+.dark .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+.dark .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+.dark .text-slate-300 {
+  color: #cbd5e1 !important;
+}
+.dark .text-slate-200 {
+  color: #e2e8f0 !important;
+}
+
+/* Status colors in dark mode */
+.dark .text-emerald-950,
+.dark .text-emerald-900,
+.dark .text-emerald-800,
+.dark .text-emerald-700 {
+  color: #6ee7b7 !important;
+}
+.dark .bg-emerald-50,
+.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+}
+
+.dark .text-teal-950,
+.dark .text-teal-900,
+.dark .text-teal-800 {
+  color: #2dd4bf !important;
+}
+.dark .text-teal-700 {
+  color: #5eead4 !important;
+}
+.dark .bg-teal-50,
+.dark .bg-teal-100 {
+  background-color: rgba(45, 212, 191, 0.15) !important;
+}
+.dark .border-teal-100,
+.dark .border-teal-200,
+.dark .border-teal-300 {
+  border-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+.dark .text-amber-950,
+.dark .text-amber-900,
+.dark .text-amber-800,
+.dark .text-amber-700 {
+  color: #fcd34d !important;
+}
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+}
+
+.dark .text-rose-950,
+.dark .text-rose-900,
+.dark .text-rose-800,
+.dark .text-rose-700 {
+  color: #fda4af !important;
+}
+.dark .bg-rose-50,
+.dark .bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.18) !important;
+}
+
+.dark .text-sky-950,
+.dark .text-sky-900,
+.dark .text-sky-800,
+.dark .text-sky-700 {
+  color: #38bdf8 !important;
+}
+.dark .bg-sky-50,
+.dark .bg-sky-100 {
+  background-color: rgba(14, 165, 233, 0.18) !important;
+}
+
+/* Table elements in dark mode */
+.dark th {
+  color: #e2e8f0 !important;
+}
+.dark td {
+  color: #f8fafc !important;
+}
+
+/* Placeholders in dark mode */
+.dark ::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* Borders override in dark mode */
+.dark .border-slate-100,
+.dark .border-slate-150,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-slate-700 {
+  border-color: var(--outline-variant) !important;
+}
+
+/* Dropdown menus, selects, textareas, inputs and their options in dark mode */
+.dark select, 
+.dark textarea, 
+.dark input {
+  background-color: var(--surface-container-lowest) !important;
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
+}
+.dark select option {
+  background-color: var(--surface-container-lowest) !important;
+  color: var(--on-surface) !important;
+}
+
+/* Ensure SVG icons that might have hardcoded stroke colors match the theme */
+.dark .text-slate-600 svg,
+.dark .text-slate-500 svg,
+.dark .text-slate-400 svg {
+  stroke: var(--on-surface-variant) !important;
+}
+
+/* Custom compact scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+/* Additional Dark Mode legibility fixes */
+.dark select option,
+.dark option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+.dark .recharts-text,
+.dark .recharts-cartesian-axis-tick-value,
+.dark .recharts-legend-item-text,
+.dark .recharts-default-legend-item {
+  fill: #cbd5e1 !important;
+  color: #cbd5e1 !important;
+}
+
+.dark strong,
+.dark b {
+  color: #f8fafc;
+}
+
+.dark .bg-white\/90 {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+}
+
+/* Printable Layout Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm 10mm 12mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Reset body and html container defaults */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide interactive controls, sidebars, headers, and buttons */
+  header, nav, aside, footer, button, .print\:hidden, .no-print {
+    display: none !important;
+  }
+
+  /* Handle modal printing cleanly without parent clipping or zero-height issue */
+  body:has(#printable-talent-report) #root > div > *:not(.fixed),
+  body:has(#printable-overall-summary-report) #root > div > *:not(.fixed) {
+    display: none !important;
+  }
+
+  /* Reset modal overlays and wrappers */
+  .fixed.inset-0 {
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  .bg-black\/60, .backdrop-blur-xs {
+    display: none !important;
+  }
+
+  /* Unconstrain modal box parent */
+  div.max-w-4xl.w-full.relative,
+  div.max-w-5xl.w-full.relative {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #printable-talent-report,
+  #printable-overall-summary-report {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Force clean dark text on crisp white background for printing */
+  #printable-talent-report *,
+  #printable-overall-summary-report * {
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  #printable-talent-report .text-primary,
+  #printable-overall-summary-report .text-primary {
+    color: #005454 !important;
+  }
+
+  #printable-talent-report .border-primary,
+  #printable-overall-summary-report .border-primary {
+    border-color: #005454 !important;
+  }
+
+  #printable-talent-report .bg-surface,
+  #printable-talent-report .bg-slate-50,
+  #printable-overall-summary-report .bg-surface,
+  #printable-overall-summary-report .bg-slate-50 {
+    background-color: #f8fafc !important;
+  }
+
+  #printable-talent-report .bg-slate-950,
+  #printable-overall-summary-report .bg-slate-900,
+  #printable-overall-summary-report .bg-slate-950 {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+  }
+
+  #printable-talent-report .bg-slate-950 *,
+  #printable-overall-summary-report .bg-slate-900 *,
+  #printable-overall-summary-report .bg-slate-950 * {
+    color: #ffffff !important;
+  }
+
+  .page-break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
