@@ -4354,7 +4354,7 @@ grant all on succession_data to anon, authenticated, service_role;`
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Feature 1 */}
-              <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary/40 dark:hover:border-teal-500/40 transition-all text-left space-y-4 shadow-xs">
+              <div className="news-card p-6 text-left space-y-4">
                 <div className="w-10 h-10 bg-teal-50 dark:bg-teal-950/80 rounded-lg flex items-center justify-center text-primary dark:text-teal-400 border border-teal-100 dark:border-teal-800/60">
                   <Brain className="w-5 h-5" />
                 </div>
@@ -4368,7 +4368,7 @@ grant all on succession_data to anon, authenticated, service_role;`
               </div>
 
               {/* Feature 2 */}
-              <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-400/40 dark:hover:border-indigo-500/40 transition-all text-left space-y-4 shadow-xs">
+              <div className="news-card p-6 text-left space-y-4">
                 <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/80 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60">
                   <BarChart3 className="w-5 h-5" />
                 </div>
@@ -4382,7 +4382,7 @@ grant all on succession_data to anon, authenticated, service_role;`
               </div>
 
               {/* Feature 3 */}
-              <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-emerald-400/40 dark:hover:border-emerald-500/40 transition-all text-left space-y-4 shadow-xs">
+              <div className="news-card p-6 text-left space-y-4">
                 <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/80 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/60">
                   <GraduationCap className="w-5 h-5" />
                 </div>

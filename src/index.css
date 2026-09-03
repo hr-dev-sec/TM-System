@@ -280,6 +280,46 @@
   background-color: rgba(30, 41, 59, 0.9) !important;
 }
 
+/* Custom Corporate News Card Component Styles */
+@keyframes borderFlash {
+  0% {
+    border-color: var(--outline-variant);
+  }
+  50% {
+    border-color: var(--primary);
+  }
+  100% {
+    border-color: var(--outline-variant);
+  }
+}
+
+.news-card {
+  border-radius: 12px;
+  border: 1px solid var(--outline-variant, #e2e8f0);
+  background-color: var(--surface, #ffffff);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.news-card:hover {
+  transform: scale(1.02);
+  animation: borderFlash 0.5s ease-in-out;
+  box-shadow: 0 10px 20px -4px rgba(0, 84, 84, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+.dark .news-card {
+  background-color: var(--surface-container-lowest, #1e293b);
+  border-color: var(--outline-variant, #334155);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+}
+
+.dark .news-card:hover {
+  transform: scale(1.02);
+  animation: borderFlash 0.5s ease-in-out;
+  box-shadow: 0 10px 22px -4px rgba(45, 212, 191, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+}
+
 /* Printable Layout Styles */
 @media print {
   @page {
