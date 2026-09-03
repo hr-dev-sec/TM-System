@@ -359,9 +359,15 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
     try {
       const res = await pushUserAccountsToSupabase(accounts);
       if (res.success) {
-        const msg = `Berhasil mengunggah ${res.count ?? accounts.length} akun ke sheet/tabel 'user_accounts' di Supabase Cloud!`;
-        setSupabaseSyncMessage({ text: msg, type: "success" });
-        onNotify?.(msg, "success");
+        let msg = `Berhasil mengunggah ${res.count ?? accounts.length} akun ke sheet/tabel 'user_accounts' di Supabase Cloud!`;
+        if (res.warning) {
+          msg += ` Catatan: ${res.warning}`;
+          setSupabaseSyncMessage({ text: msg, type: "info" });
+          onNotify?.(msg, "info");
+        } else {
+          setSupabaseSyncMessage({ text: msg, type: "success" });
+          onNotify?.(msg, "success");
+        }
         setLastSavedTime(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
       } else {
         const errorMsg = res.error || "Gagal mengunggah akun ke Supabase.";

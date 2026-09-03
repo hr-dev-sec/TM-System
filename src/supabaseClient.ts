@@ -11,7 +11,7 @@ export const USER_ACCOUNTS_SQL_SCHEMA = `-- ====================================
 -- SHEET / TABEL MANDIRI: USER_ACCOUNTS (TERPISAH DARI SUKSESI)
 -- ==========================================================
 
--- 1. Buat tabel user_accounts
+-- 1. Buat tabel user_accounts jika belum ada
 create table if not exists user_accounts (
   id text primary key,
   name text not null,
@@ -30,10 +30,26 @@ create table if not exists user_accounts (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 2. Aktifkan Row Level Security (RLS)
+-- 2. Sinkronisasi kolom (jika tabel sudah pernah dibuat sebelumnya tanpa kolom avatar/lainnya)
+alter table user_accounts add column if not exists password text default 'password123';
+alter table user_accounts add column if not exists role text default 'user';
+alter table user_accounts add column if not exists title text default '';
+alter table user_accounts add column if not exists department text default '';
+alter table user_accounts add column if not exists status text default 'active';
+alter table user_accounts add column if not exists linked_talent_id text;
+alter table user_accounts add column if not exists avatar text;
+alter table user_accounts add column if not exists initials text;
+alter table user_accounts add column if not exists notes text;
+alter table user_accounts add column if not exists last_login timestamp with time zone;
+alter table user_accounts add column if not exists updated_at timestamp with time zone default timezone('utc'::text, now());
+
+-- 3. Muat ulang cache skema PostgREST Supabase
+notify pgrst, 'reload schema';
+
+-- 4. Aktifkan Row Level Security (RLS)
 alter table user_accounts enable row level security;
 
--- 3. Kebijakan akses baca dan tulis (publik/komite)
+-- 5. Kebijakan akses baca dan tulis (publik/komite)
 drop policy if exists "Allow public read and write on user_accounts" on user_accounts;
 create policy "Allow public read and write on user_accounts" 
 on user_accounts 
@@ -41,7 +57,7 @@ for all
 using (true) 
 with check (true);
 
--- 4. Berikan hak akses penuh ke role anon, authenticated, dan service_role
+-- 6. Berikan hak akses penuh ke role anon, authenticated, dan service_role
 grant all on user_accounts to anon, authenticated, service_role;`;
 
 export const SUCCESSION_DATA_SQL_SCHEMA = `-- ==========================================================
@@ -293,7 +309,7 @@ export async function pullFromSupabase(): Promise<{
  */
 export async function pushUserAccountsToSupabase(
   accounts: UserAccount[]
-): Promise<{ success: boolean; error?: string; count?: number }> {
+): Promise<{ success: boolean; error?: string; count?: number; warning?: string }> {
   const client = getSupabaseClient();
   if (!client) {
     return { success: false, error: "Koneksi Supabase belum diatur. Periksa Project URL dan Anon Key di Pengaturan." };
@@ -318,11 +334,44 @@ export async function pushUserAccountsToSupabase(
       updated_at: new Date().toISOString()
     }));
 
-    const { error } = await client
-      .from("user_accounts")
-      .upsert(formattedRows, { onConflict: "id" });
+    let currentRows = formattedRows.map((r) => ({ ...r }));
+    const omittedColumns: string[] = [];
 
-    if (error) {
+    // Attempt upsert with automatic column stripping if Supabase schema cache lacks optional columns (e.g. avatar)
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const { error } = await client
+        .from("user_accounts")
+        .upsert(currentRows, { onConflict: "id" });
+
+      if (!error) {
+        return {
+          success: true,
+          count: currentRows.length,
+          warning: omittedColumns.length > 0
+            ? `Kolom [${omittedColumns.join(", ")}] dilewati sementara karena belum ada di tabel Supabase. Jalankan skrip SQL terbaru di modal untuk sinkronisasi penuh.`
+            : undefined
+        };
+      }
+
+      // Check if error is due to a missing column in Supabase schema cache
+      // Example: "Could not find the 'avatar' column of 'user_accounts' in the schema cache"
+      const missingColMatch =
+        error.message.match(/Could not find the '([^']+)' column of 'user_accounts'/i) ||
+        error.message.match(/column "([^"]+)" of relation "user_accounts" does not exist/i);
+
+      if (missingColMatch && missingColMatch[1]) {
+        const missingCol = missingColMatch[1];
+        if (!omittedColumns.includes(missingCol)) {
+          omittedColumns.push(missingCol);
+        }
+        currentRows = currentRows.map((row) => {
+          const copy = { ...row };
+          delete (copy as Record<string, unknown>)[missingCol];
+          return copy;
+        });
+        continue;
+      }
+
       if (
         error.message.includes('relation "user_accounts" does not exist') || 
         error.message.includes("does not exist")
@@ -332,10 +381,11 @@ export async function pushUserAccountsToSupabase(
           error: "Tabel/sheet 'user_accounts' belum dibuat di database Supabase Anda. Jalankan skrip SQL skema tabel 'user_accounts' di SQL Editor Supabase."
         };
       }
+
       return { success: false, error: error.message };
     }
 
-    return { success: true, count: formattedRows.length };
+    return { success: false, error: "Gagal menyelaraskan struktur kolom tabel user_accounts di Supabase." };
   } catch (err: any) {
     return { success: false, error: err.message || "Terjadi kesalahan saat mengunggah akun ke Supabase." };
   }

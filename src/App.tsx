@@ -4573,7 +4573,7 @@ grant all on succession_data to anon, authenticated, service_role;`
   }
 
   return (
-    <div className="min-h-screen bg-background text-on-background flex flex-col font-sans">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-background text-on-background flex flex-col font-sans">
       {/* Top App Bar (Mobile UI) */}
       <header className="md:hidden w-full top-0 sticky bg-surface-container-lowest border-b border-surface-container-highest flex justify-between items-center px-5 py-3 z-40">
         <div className="flex items-center gap-3">
@@ -4653,10 +4653,10 @@ grant all on succession_data to anon, authenticated, service_role;`
       </header>
 
       {/* Main Container */}
-      <div className="flex flex-1 min-h-[calc(100vh-60px)] md:min-h-screen relative w-full min-w-0 overflow-x-hidden">
+      <div className="flex flex-1 min-h-[calc(100vh-60px)] md:min-h-0 md:h-full relative w-full min-w-0 overflow-hidden">
         
         {/* Navigation Drawer (Desktop Sidebar with Collapse/Expand support) */}
-        <aside className={`hidden md:flex flex-col ${isSidebarCollapsed ? "w-[76px] p-2.5" : "w-[280px] p-4"} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-none space-y-2 z-40 flex-shrink-0 sticky top-0 h-screen overflow-y-auto transition-all duration-300 ease-in-out`}>
+        <aside className={`hidden md:flex flex-col ${isSidebarCollapsed ? "w-[76px] p-2.5" : "w-[280px] p-4"} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-none space-y-2 z-40 shrink-0 h-full overflow-y-auto transition-all duration-300 ease-in-out`}>
           
           {/* Brand Logo & Collapse Toggle Header */}
           <div className={`flex ${isSidebarCollapsed ? "flex-col gap-3 p-1" : "items-center justify-between pb-3.5 px-1"} mb-2 border-b border-slate-200 dark:border-slate-800`}>
@@ -4894,7 +4894,7 @@ grant all on succession_data to anon, authenticated, service_role;`
         </aside>
 
         {/* Main Scrollable Content Area */}
-        <main className="flex-1 min-w-0 w-full px-4 sm:px-6 md:px-8 py-6 pb-28 md:pb-8 bg-background overflow-x-hidden">
+        <main className="flex-1 min-w-0 w-full md:h-full px-4 sm:px-6 md:px-8 py-6 pb-28 md:pb-8 bg-background md:overflow-y-auto overflow-x-hidden">
           <div className="max-w-7xl w-full mx-auto space-y-6 min-w-0">
 
             {/* Breadcrumbs & Actions Header (Desktop) */}
