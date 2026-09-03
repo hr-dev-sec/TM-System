@@ -3894,7 +3894,7 @@ grant all on succession_data to anon, authenticated, service_role;`
 
         {/* Premium Navigation Header */}
         <header className="w-full bg-white/90 dark:bg-slate-900 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="max-w-7xl mx-auto px-6 py-3 sm:py-3.5 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="p-1 rounded-lg bg-white/90 dark:bg-white inline-flex items-center justify-center shadow-2xs">
                 <img 
@@ -3939,11 +3939,11 @@ grant all on succession_data to anon, authenticated, service_role;`
         </header>
 
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-12 md:py-20 flex-1 flex items-center">
-          <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        <section className="relative overflow-hidden pt-4 pb-10 md:pt-6 md:pb-14">
+          <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative z-10">
             
             {/* Left Column: Copy & CTAs */}
-            <div className="lg:col-span-6 space-y-6 text-left">
+            <div className="lg:col-span-6 space-y-5 text-left">
               <div className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-full text-[10px] font-extrabold text-slate-800 dark:text-slate-100">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>WORKSPACE RESMI HUMAN RESOURCE</span>
@@ -4398,12 +4398,6 @@ grant all on succession_data to anon, authenticated, service_role;`
       }, 500);
     };
 
-    const fillAccountCredentials = (account: UserAccount) => {
-      setLoginEmail(account.email);
-      setLoginPassword(account.password || "password123");
-      setLoginError("");
-    };
-
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:grid lg:grid-cols-12 font-sans selection:bg-primary/10">
         {/* Left Side: Branding */}
@@ -4566,60 +4560,6 @@ grant all on succession_data to anon, authenticated, service_role;`
                 )}
               </button>
             </form>
-
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-700 p-4 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">
-                    DATABASE AKUN PENGGUNA ({userAccounts.filter(a => a.status === "active").length} AKTIF)
-                  </span>
-                </div>
-                <span className="text-[9px] bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-200 font-bold px-2 py-0.5 rounded border border-teal-200 dark:border-teal-800">
-                  AUTO-LOAD
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                {userAccounts
-                  .filter(acc => acc.status === "active")
-                  .map((acc) => (
-                    <button
-                      key={acc.id}
-                      type="button"
-                      onClick={() => fillAccountCredentials(acc)}
-                      className={`text-left p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 rounded-xl border transition-all group cursor-pointer ${
-                        loginEmail.toLowerCase() === acc.email.toLowerCase()
-                          ? "border-primary dark:border-teal-400 ring-2 ring-primary/20 dark:ring-teal-400/20 shadow-xs"
-                          : "border-slate-200/60 dark:border-slate-700 hover:border-slate-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-1">
-                        <span className={`text-[9px] font-black uppercase tracking-wide truncate ${
-                          acc.role === "admin" ? "text-primary dark:text-teal-400" : "text-indigo-600 dark:text-indigo-400"
-                        }`}>
-                          {acc.role === "admin" ? "ADMINISTRATOR" : "USER / KARYAWAN"}
-                        </span>
-                        <span className="text-[8px] font-mono font-bold px-1 py-0.2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded shrink-0">
-                          {acc.initials || generateInitials(acc.name)}
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-slate-900 dark:text-slate-100 font-bold block truncate mt-0.5">
-                        {acc.name}
-                      </span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
-                        {acc.email}
-                      </span>
-                      <div className="flex items-center justify-between mt-1 text-[8px] text-slate-400 dark:text-slate-400">
-                        <span className="truncate">{acc.title}</span>
-                        <span className="font-semibold text-primary dark:text-teal-400 shrink-0 group-hover:translate-x-0.5 transition-transform">
-                          Pilih →
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-              </div>
-            </div>
           </div>
 
           {/* Secure footer */}
