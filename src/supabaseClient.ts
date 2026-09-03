@@ -303,13 +303,27 @@ export async function pullFromSupabase(): Promise<{
   }
 }
 
+export function formatSupabaseFriendlyError(err: any): string {
+  const msg = err?.message || String(err || "");
+  if (msg.includes("Failed to fetch") || err?.name === "TypeError" || msg.includes("NetworkError")) {
+    return (
+      "Koneksi ke Supabase terputus (Failed to fetch). " +
+      "Periksa: 1) Pastikan URL Project & Anon Key di Pengaturan sudah sesuai dengan dashboard Supabase Anda. " +
+      "2) Pastikan status proyek di Supabase Cloud dalam status ACTIVE (bukan Paused). " +
+      "3) Periksa apakah ekstensi browser (AdBlocker, Brave Shields, dsb.) memblokir domain supabase.co. " +
+      "4) Periksa koneksi internet Anda lalu coba kembali."
+    );
+  }
+  return msg;
+}
+
 /**
  * Mengunggah data akun pengguna ke sheet/tabel tersendiri: "user_accounts" di Supabase.
- * Menggunakan upsert berdasarkan id unik masing-masing akun.
+ * Menggunakan upsert berdasarkan id unik masing-masing akun dan menyelaraskan data (menghapus akun usang di cloud).
  */
 export async function pushUserAccountsToSupabase(
   accounts: UserAccount[]
-): Promise<{ success: boolean; error?: string; count?: number; warning?: string }> {
+): Promise<{ success: boolean; error?: string; count?: number; warning?: string; deletedRemoteCount?: number }> {
   const client = getSupabaseClient();
   if (!client) {
     return { success: false, error: "Koneksi Supabase belum diatur. Periksa Project URL dan Anon Key di Pengaturan." };
@@ -338,23 +352,18 @@ export async function pushUserAccountsToSupabase(
     const omittedColumns: string[] = [];
 
     // Attempt upsert with automatic column stripping if Supabase schema cache lacks optional columns (e.g. avatar)
+    let upsertSucceeded = false;
     for (let attempt = 0; attempt < 6; attempt++) {
       const { error } = await client
         .from("user_accounts")
         .upsert(currentRows, { onConflict: "id" });
 
       if (!error) {
-        return {
-          success: true,
-          count: currentRows.length,
-          warning: omittedColumns.length > 0
-            ? `Kolom [${omittedColumns.join(", ")}] dilewati sementara karena belum ada di tabel Supabase. Jalankan skrip SQL terbaru di modal untuk sinkronisasi penuh.`
-            : undefined
-        };
+        upsertSucceeded = true;
+        break;
       }
 
       // Check if error is due to a missing column in Supabase schema cache
-      // Example: "Could not find the 'avatar' column of 'user_accounts' in the schema cache"
       const missingColMatch =
         error.message.match(/Could not find the '([^']+)' column of 'user_accounts'/i) ||
         error.message.match(/column "([^"]+)" of relation "user_accounts" does not exist/i);
@@ -382,12 +391,77 @@ export async function pushUserAccountsToSupabase(
         };
       }
 
-      return { success: false, error: error.message };
+      return { success: false, error: formatSupabaseFriendlyError(error) };
     }
 
-    return { success: false, error: "Gagal menyelaraskan struktur kolom tabel user_accounts di Supabase." };
+    if (!upsertSucceeded) {
+      return { success: false, error: "Gagal menyelaraskan struktur kolom tabel user_accounts di Supabase." };
+    }
+
+    // SELARASKAN DATA: Hapus data di database cloud Supabase yang sudah dihapus dari akun lokal
+    let deletedRemoteCount = 0;
+    try {
+      const localIds = accounts.map((a) => a.id);
+      const { data: remoteRows, error: fetchRemoteErr } = await client
+        .from("user_accounts")
+        .select("id");
+
+      if (!fetchRemoteErr && remoteRows && remoteRows.length > 0) {
+        const idsToDelete = remoteRows
+          .map((r: any) => r.id)
+          .filter((remoteId: string) => !localIds.includes(remoteId));
+
+        if (idsToDelete.length > 0) {
+          const { error: delErr } = await client
+            .from("user_accounts")
+            .delete()
+            .in("id", idsToDelete);
+
+          if (!delErr) {
+            deletedRemoteCount = idsToDelete.length;
+          }
+        }
+      }
+    } catch (cleanupErr) {
+      console.warn("Gagal menyelaraskan penghapusan remote:", cleanupErr);
+    }
+
+    return {
+      success: true,
+      count: currentRows.length,
+      deletedRemoteCount,
+      warning: omittedColumns.length > 0
+        ? `Kolom [${omittedColumns.join(", ")}] dilewati sementara karena belum ada di tabel Supabase. Jalankan skrip SQL terbaru di modal untuk sinkronisasi penuh.`
+        : undefined
+    };
   } catch (err: any) {
-    return { success: false, error: err.message || "Terjadi kesalahan saat mengunggah akun ke Supabase." };
+    return { success: false, error: formatSupabaseFriendlyError(err) };
+  }
+}
+
+/**
+ * Menghapus akun tertentu langsung dari sheet/tabel "user_accounts" di Supabase Cloud.
+ */
+export async function deleteUserAccountFromSupabase(
+  accountId: string
+): Promise<{ success: boolean; error?: string }> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return { success: false, error: "Koneksi Supabase belum diatur. Periksa Project URL dan Anon Key di Pengaturan." };
+  }
+
+  try {
+    const { error } = await client
+      .from("user_accounts")
+      .delete()
+      .eq("id", accountId);
+
+    if (error) {
+      return { success: false, error: formatSupabaseFriendlyError(error) };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: formatSupabaseFriendlyError(err) };
   }
 }
 
@@ -405,10 +479,17 @@ export async function pullUserAccountsFromSupabase(): Promise<{
   }
 
   try {
-    const { data, error } = await client
+    // Coba dengan pengurutan created_at jika ada kolomnya, fallback ke select sederhana
+    let result = await client
       .from("user_accounts")
       .select("*")
       .order("created_at", { ascending: false });
+
+    if (result.error && (result.error.message.includes("created_at") || result.error.message.includes("does not exist"))) {
+      result = await client.from("user_accounts").select("*");
+    }
+
+    const { data, error } = result;
 
     if (error) {
       if (
@@ -420,7 +501,7 @@ export async function pullUserAccountsFromSupabase(): Promise<{
           error: "Tabel/sheet 'user_accounts' belum dibuat di database Supabase Anda. Jalankan skrip SQL skema tabel 'user_accounts' di SQL Editor Supabase."
         };
       }
-      return { success: false, error: error.message };
+      return { success: false, error: formatSupabaseFriendlyError(error) };
     }
 
     if (!data || data.length === 0) {
@@ -450,6 +531,6 @@ export async function pullUserAccountsFromSupabase(): Promise<{
 
     return { success: true, accounts };
   } catch (err: any) {
-    return { success: false, error: err.message || "Terjadi kesalahan saat menarik data akun pengguna dari Supabase." };
+    return { success: false, error: formatSupabaseFriendlyError(err) };
   }
 }

@@ -49,6 +49,7 @@ import {
   getSupabaseConfig, 
   pushUserAccountsToSupabase, 
   pullUserAccountsFromSupabase, 
+  deleteUserAccountFromSupabase,
   USER_ACCOUNTS_SQL_SCHEMA 
 } from "../supabaseClient";
 
@@ -267,7 +268,7 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
     onNotify?.(`Status akun ${acc.name} diubah menjadi ${nextStatus === "active" ? "Aktif" : "Non-Aktif"}.`, "info");
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteCandidate) return;
 
     if (deleteCandidate.id === currentUserId) {
@@ -282,12 +283,37 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
       return;
     }
 
-    const updated = accounts.filter((a) => a.id !== deleteCandidate.id);
+    const candidate = deleteCandidate;
+    setDeleteCandidate(null);
+
+    const updated = accounts.filter((a) => a.id !== candidate.id);
     saveUserAccounts(updated);
     onAccountsChange(updated);
     setLastSavedTime(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
-    onNotify?.(`Akun ${deleteCandidate.name} berhasil dihapus dari database.`, "success");
-    setDeleteCandidate(null);
+
+    // Jika Supabase aktif, hapus juga akun ini secara langsung dari tabel user_accounts di Supabase!
+    if (supabaseConfig.isEnabled && supabaseConfig.url && supabaseConfig.anonKey) {
+      try {
+        const res = await deleteUserAccountFromSupabase(candidate.id);
+        if (res.success) {
+          onNotify?.(`Akun ${candidate.name} berhasil dihapus dari database lokal & Supabase Cloud.`, "success");
+          setSupabaseSyncMessage({
+            text: `Akun ${candidate.name} (${candidate.email}) telah dihapus dari tabel 'user_accounts' di Supabase Cloud.`,
+            type: "success"
+          });
+        } else {
+          onNotify?.(`Akun ${candidate.name} dihapus dari lokal. (Hapus di Supabase: ${res.error}).`, "warning");
+          setSupabaseSyncMessage({
+            text: `Akun dihapus dari lokal, namun gagal dihapus di Supabase: ${res.error}. Anda dapat klik 'Push Akun ke Supabase' untuk menyelaraskan.`,
+            type: "error"
+          });
+        }
+      } catch (err: any) {
+        onNotify?.(`Akun ${candidate.name} berhasil dihapus dari database lokal.`, "success");
+      }
+    } else {
+      onNotify?.(`Akun ${candidate.name} berhasil dihapus dari database lokal.`, "success");
+    }
   };
 
   const handleExportJson = () => {
@@ -359,7 +385,10 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
     try {
       const res = await pushUserAccountsToSupabase(accounts);
       if (res.success) {
-        let msg = `Berhasil mengunggah ${res.count ?? accounts.length} akun ke sheet/tabel 'user_accounts' di Supabase Cloud!`;
+        let msg = `Berhasil menyelaraskan ${res.count ?? accounts.length} akun aktif ke tabel 'user_accounts' di Supabase Cloud!`;
+        if (res.deletedRemoteCount && res.deletedRemoteCount > 0) {
+          msg += ` (${res.deletedRemoteCount} akun usang/terhapus di database Supabase berhasil dibersihkan).`;
+        }
         if (res.warning) {
           msg += ` Catatan: ${res.warning}`;
           setSupabaseSyncMessage({ text: msg, type: "info" });
@@ -378,7 +407,7 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
         }
       }
     } catch (err: any) {
-      const errorMsg = err.message || "Terjadi kesalahan.";
+      const errorMsg = err?.message || "Terjadi kesalahan.";
       setSupabaseSyncMessage({ text: errorMsg, type: "error" });
       onNotify?.(errorMsg, "warning");
     } finally {
@@ -1135,6 +1164,13 @@ export const UserAccountManagement: React.FC<UserAccountManagementProps> = ({
                 <span className="font-bold">{deleteCandidate.title}</span>
               </div>
             </div>
+
+            {supabaseConfig.isEnabled && supabaseConfig.url && supabaseConfig.anonKey && (
+              <div className="flex items-center gap-2 p-2.5 bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/60 rounded-xl text-[11px] text-teal-800 dark:text-teal-200">
+                <Database className="w-4 h-4 shrink-0 text-teal-600 dark:text-teal-400" />
+                <span>Akun ini juga akan <strong>langsung dihapus secara permanen dari tabel user_accounts di Supabase Cloud</strong>.</span>
+              </div>
+            )}
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
