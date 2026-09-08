@@ -5055,27 +5055,27 @@ grant all on succession_data to anon, authenticated, service_role;`
           {/* Stagnant Desktop Header Bar (Tetap di atas, tidak ikut ter-scroll) */}
           <header className="hidden md:flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30 shrink-0 shadow-2xs">
             <div className="max-w-7xl w-full mx-auto flex justify-between items-center">
-              <div className="flex items-center gap-2 text-on-surface-variant text-sm font-medium">
+              <div className="flex items-center gap-2 text-on-surface-variant dark:text-slate-200 text-sm font-medium">
                 {userRole === "admin" ? (
                   <>
                     <button 
                       onClick={() => setActiveTab("talent-pool")}
-                      className="hover:text-primary transition-colors cursor-pointer"
+                      className="hover:text-primary dark:hover:text-teal-300 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
                     >
                       Talent Pool
                     </button>
                     {activeTab === "profile" && (
                       <>
-                        <ChevronRight className="w-4 h-4 text-outline" />
-                        <span className="text-primary font-semibold">{currentTalent.name}</span>
+                        <ChevronRight className="w-4 h-4 text-outline dark:text-slate-400" />
+                        <span className="text-primary dark:text-teal-400 font-bold">{currentTalent.name}</span>
                       </>
                     )}
                   </>
                 ) : (
                   <>
-                    <span className="text-on-surface-variant">Profil Saya</span>
-                    <ChevronRight className="w-4 h-4 text-outline" />
-                    <span className="text-primary font-semibold">{currentTalent.name} (Karyawan)</span>
+                    <span className="text-on-surface-variant dark:text-slate-200">Profil Saya</span>
+                    <ChevronRight className="w-4 h-4 text-outline dark:text-slate-400" />
+                    <span className="text-primary dark:text-teal-400 font-bold">{currentTalent.name} (Karyawan)</span>
                   </>
                 )}
               </div>
@@ -5086,10 +5086,10 @@ grant all on succession_data to anon, authenticated, service_role;`
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={handleOpenEditProfile}
-                      className="h-8.5 px-3 bg-white hover:bg-surface-container-low text-secondary border border-surface-container-highest shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                      className="h-8.5 px-3 bg-white dark:bg-slate-800 hover:bg-surface-container-low dark:hover:bg-slate-700 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
                       title="Edit Profil Lengkap Talenta"
                     >
-                      <Edit2 className="w-3.5 h-3.5 text-primary" />
+                      <Edit2 className="w-3.5 h-3.5 text-primary dark:text-teal-400" />
                       <span>Edit Profil</span>
                     </button>
                     {userRole === "admin" && (
@@ -5112,7 +5112,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                     className={`h-8.5 px-3 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
                       isEditingScores 
                         ? "bg-amber-600 text-white shadow-xs hover:bg-amber-700" 
-                        : "bg-white text-secondary border border-surface-container-highest shadow-2xs hover:bg-surface-container-low"
+                        : "bg-white dark:bg-slate-800 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs hover:bg-surface-container-low dark:hover:bg-slate-700"
                     }`}
                     title="Mode Edit Skor / Simulasi Metrics Assessment"
                   >
@@ -5249,43 +5249,43 @@ grant all on succession_data to anon, authenticated, service_role;`
                     <>
                       {/* KPI Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="bg-white p-5 rounded-xl border border-surface-container-highest shadow-sm flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-surface-container-highest dark:border-slate-800 shadow-sm flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-primary/10 dark:bg-teal-950/60 flex items-center justify-center text-primary dark:text-teal-300">
                             <Users className="w-6 h-6" />
                           </div>
                           <div>
-                            <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider block">Total Talents</span>
-                            <span className="text-2xl font-bold text-on-surface">{totalTalents}</span>
+                            <span className="text-xs text-on-surface-variant dark:text-slate-300 font-semibold uppercase tracking-wider block">Total Talents</span>
+                            <span className="text-2xl font-bold text-on-surface dark:text-white">{totalTalents}</span>
                           </div>
                         </div>
 
-                        <div className="bg-white p-5 rounded-xl border border-surface-container-highest shadow-sm flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-surface-container-highest dark:border-slate-800 shadow-sm flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                             <CheckCircle2 className="w-6 h-6" />
                           </div>
                           <div>
-                            <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider block">Ready Immediately</span>
-                            <span className="text-2xl font-bold text-emerald-600">{readyNowCount}</span>
+                            <span className="text-xs text-on-surface-variant dark:text-slate-300 font-semibold uppercase tracking-wider block">Ready Immediately</span>
+                            <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{readyNowCount}</span>
                           </div>
                         </div>
 
-                        <div className="bg-white p-5 rounded-xl border border-surface-container-highest shadow-sm flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-surface-container-highest dark:border-slate-800 shadow-sm flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
                             <Brain className="w-6 h-6" />
                           </div>
                           <div>
-                            <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider block">Avg Analytics Score</span>
-                            <span className="text-2xl font-bold text-on-surface">{avgLogicalScore}%</span>
+                            <span className="text-xs text-on-surface-variant dark:text-slate-300 font-semibold uppercase tracking-wider block">Avg Analytics Score</span>
+                            <span className="text-2xl font-bold text-on-surface dark:text-white">{avgLogicalScore}%</span>
                           </div>
                         </div>
 
-                        <div className="bg-white p-5 rounded-xl border border-surface-container-highest shadow-sm flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-surface-container-highest dark:border-slate-800 shadow-sm flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                             <TrendingUp className="w-6 h-6" />
                           </div>
                           <div>
-                            <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider block">Avg Leadership Score</span>
-                            <span className="text-2xl font-bold text-on-surface">{avgLeadershipScore}%</span>
+                            <span className="text-xs text-on-surface-variant dark:text-slate-300 font-semibold uppercase tracking-wider block">Avg Leadership Score</span>
+                            <span className="text-2xl font-bold text-on-surface dark:text-white">{avgLeadershipScore}%</span>
                           </div>
                         </div>
                       </div>
@@ -5298,12 +5298,12 @@ grant all on succession_data to anon, authenticated, service_role;`
                               <Sparkles className="w-5 h-5 text-amber-500" />
                               <span>Quick Insights: Heatmap Talent Highlights</span>
                             </h3>
-                            <p className="text-xs text-on-surface-variant dark:text-slate-400 mt-0.5">
+                            <p className="text-xs text-on-surface-variant dark:text-slate-300 mt-0.5">
                               Sorotan otomatis 3 talenta dengan rating tertinggi (Top Star Performers) dan 3 talenta terendah (Need Attention) berdasarkan data evaluasi matriks & heatmap terkini.
                             </p>
                           </div>
                           <div className="flex items-center gap-2 self-start sm:self-auto">
-                            <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0">
                               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                               Live Auto-Calculated
                             </span>
@@ -5312,20 +5312,20 @@ grant all on succession_data to anon, authenticated, service_role;`
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                           {/* Top 3 Highest Rated Card */}
-                          <div className="bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/80 dark:border-emerald-800/50 p-4 space-y-3">
-                            <div className="flex justify-between items-center pb-2.5 border-b border-emerald-200/60 dark:border-emerald-800/40">
+                          <div className="bg-emerald-50/60 dark:bg-slate-900/95 rounded-xl border border-emerald-200/80 dark:border-emerald-500/40 p-4 space-y-3">
+                            <div className="flex justify-between items-center pb-2.5 border-b border-emerald-200/60 dark:border-emerald-800/60">
                               <div className="flex items-center gap-2">
                                 <div className="p-1.5 bg-emerald-600 text-white rounded-lg shadow-2xs">
                                   <Award className="w-4 h-4" />
                                 </div>
                                 <div>
-                                  <h4 className="text-xs font-black uppercase text-emerald-950 dark:text-emerald-200 tracking-wider">
+                                  <h4 className="text-xs font-black uppercase text-emerald-950 dark:text-emerald-300 tracking-wider">
                                     Top 3 Highest-Rated Talents
                                   </h4>
                                   <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">Rating Kinerja & Potensi Tertinggi</span>
                                 </div>
                               </div>
-                              <span className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
+                              <span className="text-[10px] font-black uppercase text-emerald-800 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-950/90 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
                                 Star Performers
                               </span>
                             </div>
@@ -5338,7 +5338,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                                     setSelectedTalentId(item.talent.id);
                                     setActiveTab("profile");
                                   }}
-                                  className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-emerald-100 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-600 shadow-2xs transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
+                                  className="p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-emerald-100 dark:border-slate-700/80 hover:border-emerald-400 dark:hover:border-emerald-500 shadow-2xs transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
                                     <div className="relative shrink-0">
@@ -5349,24 +5349,24 @@ grant all on succession_data to anon, authenticated, service_role;`
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap">
-                                        <h5 className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                                        <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                           {item.talent.name}
                                         </h5>
                                         <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 shrink-0 border border-emerald-200 dark:border-emerald-800">
                                           {item.cellName}
                                         </span>
                                       </div>
-                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                        {item.talent.title} • <strong className="text-slate-700 dark:text-slate-300">{item.talent.division}</strong>
+                                      <p className="text-[10px] text-slate-600 dark:text-slate-300 truncate mt-0.5">
+                                        {item.talent.title} • <strong className="text-slate-800 dark:text-slate-100">{item.talent.division}</strong>
                                       </p>
                                     </div>
                                   </div>
 
                                   <div className="text-right shrink-0">
-                                    <div className="text-xs font-black font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                                      {item.overallRating}% <span className="text-[9px] font-sans font-medium text-emerald-600/80 dark:text-emerald-400/80">Rating</span>
+                                    <div className="text-xs font-black font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-700">
+                                      {item.overallRating}% <span className="text-[9px] font-sans font-medium text-emerald-600/80 dark:text-emerald-300/90">Rating</span>
                                     </div>
-                                    <div className="text-[9px] text-slate-500 dark:text-slate-400 font-mono mt-1">
+                                    <div className="text-[9px] text-slate-600 dark:text-slate-300 font-mono mt-1 font-medium">
                                       Perf: {item.perfScore}% | Pot: {item.potScore}%
                                     </div>
                                   </div>
@@ -5376,20 +5376,20 @@ grant all on succession_data to anon, authenticated, service_role;`
                           </div>
 
                           {/* Top 3 Lowest Rated Card */}
-                          <div className="bg-rose-50/60 dark:bg-rose-950/20 rounded-xl border border-rose-200/80 dark:border-rose-800/50 p-4 space-y-3">
-                            <div className="flex justify-between items-center pb-2.5 border-b border-rose-200/60 dark:border-rose-800/40">
+                          <div className="bg-rose-50/60 dark:bg-slate-900/95 rounded-xl border border-rose-200/80 dark:border-rose-500/40 p-4 space-y-3">
+                            <div className="flex justify-between items-center pb-2.5 border-b border-rose-200/60 dark:border-rose-800/60">
                               <div className="flex items-center gap-2">
                                 <div className="p-1.5 bg-rose-600 text-white rounded-lg shadow-2xs">
                                   <ShieldAlert className="w-4 h-4" />
                                 </div>
                                 <div>
-                                  <h4 className="text-xs font-black uppercase text-rose-950 dark:text-rose-200 tracking-wider">
+                                  <h4 className="text-xs font-black uppercase text-rose-950 dark:text-rose-300 tracking-wider">
                                     Top 3 Lowest-Rated Talents
                                   </h4>
                                   <span className="text-[10px] text-rose-700 dark:text-rose-400 font-medium">Membutuhkan Bimbingan & Pendampingan</span>
                                 </div>
                               </div>
-                              <span className="text-[10px] font-black uppercase text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/60 px-2.5 py-0.5 rounded-full border border-rose-300 dark:border-rose-700">
+                              <span className="text-[10px] font-black uppercase text-rose-800 dark:text-rose-200 bg-rose-100 dark:bg-rose-950/90 px-2.5 py-0.5 rounded-full border border-rose-300 dark:border-rose-700">
                                 Need Attention
                               </span>
                             </div>
@@ -5402,7 +5402,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                                     setSelectedTalentId(item.talent.id);
                                     setActiveTab("profile");
                                   }}
-                                  className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-rose-100 dark:border-slate-800 hover:border-rose-400 dark:hover:border-rose-600 shadow-2xs transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
+                                  className="p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-rose-100 dark:border-slate-700/80 hover:border-rose-400 dark:hover:border-rose-500 shadow-2xs transition-all flex items-center justify-between gap-3 cursor-pointer group active:scale-[0.99]"
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
                                     <div className="relative shrink-0">
@@ -5413,24 +5413,24 @@ grant all on succession_data to anon, authenticated, service_role;`
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap">
-                                        <h5 className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate group-hover:text-rose-700 dark:group-hover:text-rose-400 transition-colors">
+                                        <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-rose-700 dark:group-hover:text-rose-400 transition-colors">
                                           {item.talent.name}
                                         </h5>
                                         <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 shrink-0 border border-rose-200 dark:border-rose-800">
                                           {item.cellName}
                                         </span>
                                       </div>
-                                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                        {item.talent.title} • <strong className="text-slate-700 dark:text-slate-300">{item.talent.division}</strong>
+                                      <p className="text-[10px] text-slate-600 dark:text-slate-300 truncate mt-0.5">
+                                        {item.talent.title} • <strong className="text-slate-800 dark:text-slate-100">{item.talent.division}</strong>
                                       </p>
                                     </div>
                                   </div>
 
                                   <div className="text-right shrink-0">
-                                    <div className="text-xs font-black font-mono text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/80 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
-                                      {item.overallRating}% <span className="text-[9px] font-sans font-medium text-rose-600/80 dark:text-rose-400/80">Rating</span>
+                                    <div className="text-xs font-black font-mono text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/90 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                                      {item.overallRating}% <span className="text-[9px] font-sans font-medium text-rose-600/80 dark:text-rose-300/90">Rating</span>
                                     </div>
-                                    <div className="text-[9px] text-slate-500 dark:text-slate-400 font-mono mt-1">
+                                    <div className="text-[9px] text-slate-600 dark:text-slate-300 font-mono mt-1 font-medium">
                                       Perf: {item.perfScore}% | Pot: {item.potScore}%
                                     </div>
                                   </div>
