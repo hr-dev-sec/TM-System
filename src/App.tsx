@@ -5053,37 +5053,150 @@ grant all on succession_data to anon, authenticated, service_role;`
         <div className="flex-1 flex flex-col min-w-0 md:h-full overflow-hidden">
           
           {/* Stagnant Desktop Header Bar (Tetap di atas, tidak ikut ter-scroll) */}
-          <header className="hidden md:flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30 shrink-0 shadow-2xs">
-            <div className="max-w-7xl w-full mx-auto flex justify-between items-center">
-              <div className="flex items-center gap-2 text-on-surface-variant dark:text-slate-200 text-sm font-medium">
-                {userRole === "admin" ? (
-                  <>
-                    <button 
-                      onClick={() => setActiveTab("talent-pool")}
-                      className="hover:text-primary dark:hover:text-teal-300 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
-                    >
-                      Talent Pool
-                    </button>
-                    {activeTab === "profile" && (
+          <header className="hidden md:flex items-center justify-between px-4 sm:px-6 md:px-8 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 shrink-0 shadow-2xs">
+            <div className="max-w-7xl w-full mx-auto flex justify-between items-center gap-4">
+              
+              {/* Left Context: Tab Icon Badge, Dynamic Breadcrumb & Status Pill */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200/60 dark:border-teal-800/60 flex items-center justify-center text-primary dark:text-teal-400 shrink-0 shadow-2xs">
+                  {activeTab === "home" && <LayoutGrid className="w-4.5 h-4.5" />}
+                  {activeTab === "talent-pool" && <Users className="w-4.5 h-4.5" />}
+                  {activeTab === "nine-box" && <Grid3X3 className="w-4.5 h-4.5" />}
+                  {activeTab === "profile" && <Award className="w-4.5 h-4.5" />}
+                  {activeTab === "settings" && <Sliders className="w-4.5 h-4.5" />}
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-teal-400/90 leading-none">
+                      Ajinomoto Succession Portal
+                    </span>
+                    <span className="text-slate-300 dark:text-slate-700 leading-none">•</span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-none">
+                      {userRole === "admin" ? "Admin Authority" : "Employee View"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    {userRole === "admin" ? (
                       <>
-                        <ChevronRight className="w-4 h-4 text-outline dark:text-slate-400" />
-                        <span className="text-primary dark:text-teal-400 font-bold">{currentTalent.name}</span>
+                        {activeTab === "profile" ? (
+                          <>
+                            <button 
+                              onClick={() => setActiveTab("talent-pool")}
+                              className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition-colors cursor-pointer"
+                            >
+                              Talent Pool
+                            </button>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                            <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                              {currentTalent.name}
+                            </h2>
+                            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 shrink-0">
+                              {currentTalent.division}
+                            </span>
+                          </>
+                        ) : activeTab === "home" ? (
+                          <>
+                            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                              Executive Dashboard
+                            </h2>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300 border border-teal-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                              Overview FY 24/25
+                            </span>
+                          </>
+                        ) : activeTab === "talent-pool" ? (
+                          <>
+                            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                              Talent Directory & Pool
+                            </h2>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              {talents.length} Talenta Terdaftar
+                            </span>
+                          </>
+                        ) : activeTab === "nine-box" ? (
+                          <>
+                            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                              Nine-Box Matrix Grid
+                            </h2>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                              {readyNowCount} Ready Immediately
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                              Advisory & System Controls
+                            </h2>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                              Rules & Security
+                            </span>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Profil Saya</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                        <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {currentTalent.name}
+                        </h2>
+                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 shrink-0">
+                          {currentTalent.division}
+                        </span>
                       </>
                     )}
-                  </>
-                ) : (
-                  <>
-                    <span className="text-on-surface-variant dark:text-slate-200">Profil Saya</span>
-                    <ChevronRight className="w-4 h-4 text-outline dark:text-slate-400" />
-                    <span className="text-primary dark:text-teal-400 font-bold">{currentTalent.name} (Karyawan)</span>
-                  </>
-                )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Center Quick Search / Command Launcher (Mengisi ruang tengah yang sebelumnya kosong) */}
+              <div className="hidden lg:flex items-center flex-1 max-w-xs xl:max-w-md mx-2">
+                <button
+                  onClick={() => setIsCommandPaletteOpen(true)}
+                  className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-500/60 dark:hover:border-teal-400/50 text-slate-500 dark:text-slate-300 text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer group"
+                  title="Cari talenta, divisi, skor atau menu aksi (Ctrl + K)"
+                >
+                  <div className="flex items-center gap-2.5 truncate">
+                    <Search className="w-3.5 h-3.5 text-slate-400 dark:text-teal-400 group-hover:text-primary dark:group-hover:text-teal-300 transition-colors shrink-0" />
+                    <span className="truncate text-slate-500 dark:text-slate-300 font-medium">Cari talenta, divisi, skor...</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <kbd className="font-mono text-[9px] font-bold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-2xs">Ctrl K</kbd>
+                  </div>
+                </button>
               </div>
               
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Edit Profil Lengkap Button */}
+              {/* Right Action Center & Utilities */}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Utilities: Dark Mode Toggle & Shortcut Keys */}
+                <div className="flex items-center gap-1.5">
+                  <button 
+                    onClick={() => setIsDarkMode(!isDarkMode)}
+                    className="h-8.5 w-8.5 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 transition-all shadow-2xs cursor-pointer active:scale-95"
+                    title={isDarkMode ? "Ganti ke Mode Terang (Light Mode)" : "Ganti ke Mode Gelap (Dark Mode)"}
+                  >
+                    {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-slate-700" />}
+                  </button>
+
+                  <button 
+                    onClick={() => setIsShortcutsModalOpen(true)}
+                    className="h-8.5 w-8.5 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-sky-400 transition-all shadow-2xs cursor-pointer active:scale-95"
+                    title="Panduan Shortcut Keyboard (?)"
+                  >
+                    <Keyboard className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="h-5 w-px bg-slate-200 dark:border-slate-700 mx-0.5"></div>
+
+                {/* Edit Profil Lengkap Button (Ketika di Tab Profile) */}
                 {activeTab === "profile" && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button 
                       onClick={handleOpenEditProfile}
                       className="h-8.5 px-3 bg-white dark:bg-slate-800 hover:bg-surface-container-low dark:hover:bg-slate-700 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
@@ -5111,7 +5224,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                     onClick={() => setIsEditingScores(!isEditingScores)}
                     className={`h-8.5 px-3 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
                       isEditingScores 
-                        ? "bg-amber-600 text-white shadow-xs hover:bg-amber-700" 
+                        ? "bg-amber-600 text-white shadow-xs hover:bg-amber-700 border border-amber-600" 
                         : "bg-white dark:bg-slate-800 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs hover:bg-surface-container-low dark:hover:bg-slate-700"
                     }`}
                     title="Mode Edit Skor / Simulasi Metrics Assessment"
@@ -5121,7 +5234,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                   </button>
                 )}
 
-                <div className="h-4 w-px bg-surface-container-highest mx-0.5 hidden sm:block"></div>
+                <div className="h-4 w-px bg-surface-container-highest dark:border-slate-700 mx-0.5 hidden sm:block"></div>
 
                 <button 
                   onClick={() => setIsOverallSummaryModalOpen(true)}
