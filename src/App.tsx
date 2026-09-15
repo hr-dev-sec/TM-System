@@ -5933,8 +5933,13 @@ grant all on succession_data to anon, authenticated, service_role;`
 
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                           {/* Heatmap Grid - Height matched to 360px scrollable container */}
-                          <div className="xl:col-span-2 overflow-x-auto overflow-y-auto max-h-[360px] border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/20 dark:bg-slate-900/20 custom-scrollbar relative">
-                            <table className="w-full border-collapse text-left text-xs min-w-[1250px]">
+                          <div className="xl:col-span-2 space-y-1.5">
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 xl:hidden flex items-center gap-1.5 px-1 font-medium">
+                              <span>↔</span>
+                              <span>Geser ke samping (horizontal) untuk melihat seluruh kolom kompetensi</span>
+                            </div>
+                            <div className="overflow-x-auto overflow-y-auto max-h-[360px] border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/20 dark:bg-slate-900/20 custom-scrollbar relative">
+                              <table className="w-full border-collapse text-left text-xs min-w-[1250px]">
                               <thead className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800 shadow-xs">
                                 <tr className="border-b border-slate-200 dark:border-slate-700">
                                   <th className="p-3 font-bold text-slate-800 dark:text-slate-200 min-w-[200px]">Departemen / Divisi</th>
@@ -5999,6 +6004,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                                 )}
                               </tbody>
                             </table>
+                          </div>
                           </div>
 
                           {/* Analysis and Recommendations Column - Height matched to 360px scrollable container */}
@@ -7067,15 +7073,15 @@ grant all on succession_data to anon, authenticated, service_role;`
                           }`}
                         >
                           <div>
-                            <div className="flex items-start justify-between gap-4 mb-4">
-                              <div className="flex gap-4">
-                                <img src={t.avatar} className="w-16 h-16 rounded-full object-cover border-2 border-surface shadow-sm" alt={t.name} referrerPolicy="no-referrer" />
-                                <div>
-                                  <h3 className="font-display font-bold text-base text-on-surface">{t.name}</h3>
-                                  <p className="text-xs text-secondary font-medium">{t.title}</p>
-                                  <div className="flex items-center gap-1.5 text-xs text-on-surface-variant mt-1.5">
-                                    <MapPin className="w-3.5 h-3.5 text-outline" />
-                                    <span>{t.location}</span>
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-4">
+                              <div className="flex items-center sm:items-start gap-3.5 min-w-0 flex-1">
+                                <img src={t.avatar} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-surface shadow-sm shrink-0" alt={t.name} referrerPolicy="no-referrer" />
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="font-display font-bold text-sm sm:text-base text-on-surface truncate">{t.name}</h3>
+                                  <p className="text-xs text-secondary font-medium truncate">{t.title}</p>
+                                  <div className="flex items-center gap-1.5 text-xs text-on-surface-variant mt-1">
+                                    <MapPin className="w-3.5 h-3.5 text-outline shrink-0" />
+                                    <span className="truncate">{t.location}</span>
                                   </div>
                                 </div>
                               </div>
@@ -7084,7 +7090,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                                   value={t.readiness}
                                   onChange={(e) => handleUpdateReadiness(t.id, e.target.value)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className={`text-[10px] font-bold px-2 py-1 rounded-full border cursor-pointer focus:outline-none ${
+                                  className={`text-[10px] font-bold px-2 py-1 rounded-full border cursor-pointer focus:outline-none shrink-0 self-start ${
                                     t.readinessColor === "emerald" 
                                       ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                                       : t.readinessColor === "amber"
@@ -7097,7 +7103,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                                   <option value="READY 2+ YEARS">READY 2+ YEARS</option>
                                 </select>
                               ) : (
-                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border shrink-0 self-start ${
                                   t.readinessColor === "emerald" 
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                                     : t.readinessColor === "amber"
@@ -7915,12 +7921,12 @@ grant all on succession_data to anon, authenticated, service_role;`
                               </div>
 
                               {/* Component summary */}
-                              <div className="bg-white border-t border-surface-container-highest px-4 py-3 flex flex-wrap justify-between items-center text-xs font-bold text-on-surface-variant gap-4">
-                                <div className="flex items-center gap-4">
+                              <div className="bg-white border-t border-surface-container-highest px-4 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs font-bold text-on-surface-variant gap-3">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                                   <div>Jumlah Poin (i = sum a-h): <span className="text-on-surface font-mono font-black">{details.sumPsych} / 32 (Standar Base: 24)</span></div>
                                   <div>Rasio (j = i / 24): <span className="text-on-surface font-mono font-black">{(details.psychRatio).toFixed(3)}</span></div>
                                 </div>
-                                <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-extrabold uppercase">
+                                <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-extrabold uppercase shrink-0">
                                   Skor Tertimbang (k): {details.psychWeighted.toFixed(1)}%
                                 </div>
                               </div>
@@ -8266,8 +8272,13 @@ grant all on succession_data to anon, authenticated, service_role;`
                         </div>
 
                         {/* Table container matching the uploaded style */}
-                        <div className="border border-surface-container-highest rounded-xl overflow-hidden bg-white shadow-sm overflow-x-auto">
-                          <div className="min-w-[640px]">
+                        <div className="space-y-1.5">
+                          <div className="text-[10px] text-slate-400 dark:text-slate-500 sm:hidden flex items-center gap-1.5 px-1 font-medium">
+                            <span>↔</span>
+                            <span>Geser ke samping untuk melihat seluruh riwayat evaluasi tahunan</span>
+                          </div>
+                          <div className="border border-surface-container-highest rounded-xl overflow-hidden bg-white shadow-sm overflow-x-auto">
+                            <div className="min-w-[640px]">
                             <div 
                               className="grid bg-slate-900 text-white text-xs font-black uppercase text-center tracking-wider"
                               style={{ gridTemplateColumns: `140px repeat(${evaluationYears.length}, minmax(0, 1fr))` }}
@@ -8342,6 +8353,7 @@ grant all on succession_data to anon, authenticated, service_role;`
                               Skor Kinerja Sumbu Y: {perfDetails.score50.toFixed(2)} / 50.00 ({Math.round(perfDetails.percentage)}%)
                             </div>
                           </div>
+                        </div>
                         </div>
                       </section>
                     );
@@ -10980,8 +10992,13 @@ grant all on succession_data to anon, authenticated, service_role;`
                           </div>
 
                           {nineBoxViewMode === "chart" ? (
-                            <div className="relative bg-slate-50 dark:bg-slate-900 p-4 sm:p-8 rounded-2xl border border-surface-container-highest dark:border-slate-800 shadow-sm overflow-x-auto custom-scrollbar">
-                              <div className="min-w-[650px] space-y-6">
+                            <div className="space-y-1.5">
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 md:hidden flex items-center gap-1.5 px-1 font-medium">
+                                <span>↔</span>
+                                <span>Geser ke samping untuk melihat grafik Scatter Plot 9-Box secara utuh</span>
+                              </div>
+                              <div className="relative bg-slate-50 dark:bg-slate-900 p-4 sm:p-8 rounded-2xl border border-surface-container-highest dark:border-slate-800 shadow-sm overflow-x-auto custom-scrollbar">
+                                <div className="min-w-[650px] space-y-6">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                   <div className="text-left sm:text-center">
                                     <h2 className="text-slate-800 dark:text-slate-100 font-display text-xl md:text-2xl font-black tracking-wide uppercase">
@@ -11163,9 +11180,15 @@ grant all on succession_data to anon, authenticated, service_role;`
                                 </div>
                               </div>
                             </div>
+                            </div>
                           ) : (
-                            <div className="relative bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-surface-container-highest dark:border-slate-800 shadow-sm overflow-x-auto custom-scrollbar">
-                              {/* Drag-and-drop hint banner */}
+                            <div className="space-y-1.5">
+                              <div className="text-[10px] text-slate-400 dark:text-slate-500 md:hidden flex items-center gap-1.5 px-1 font-medium">
+                                <span>↔</span>
+                                <span>Geser ke samping untuk melihat seluruh 9 kotak matriks dan melakukan drag-and-drop</span>
+                              </div>
+                              <div className="relative bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-surface-container-highest dark:border-slate-800 shadow-sm overflow-x-auto custom-scrollbar">
+                                {/* Drag-and-drop hint banner */}
                               <div className="mb-4 bg-primary/5 dark:bg-primary/10 border border-primary-container/20 dark:border-primary-container/30 rounded-xl p-3 flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-primary-container/30 text-primary shrink-0">
                                   <Sparkles className="w-4 h-4 animate-pulse" />
@@ -11238,6 +11261,7 @@ grant all on succession_data to anon, authenticated, service_role;`
 
                                 </div>
                               </div>
+                            </div>
                             </div>
                           )}
 
@@ -11330,25 +11354,27 @@ grant all on succession_data to anon, authenticated, service_role;`
                                     <span className="text-xs font-black text-primary dark:text-primary-container font-mono">{getTalentPerformanceScore(talent).toFixed(2)}</span>
                                   </div>
                                   
-                                  <div className="grid gap-1 text-center bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-surface-container-highest dark:border-slate-700" style={{ gridTemplateColumns: `repeat(${evaluationYears.length}, minmax(0, 1fr))` }}>
-                                    {evaluationYears.map((yr) => {
-                                      const yearKey = `fy${yr}`;
-                                      const val = talent.performanceEvaluation?.[yearKey] ?? 0;
-                                      return (
-                                        <div key={yr} className="space-y-1">
-                                          <div className="text-[8px] font-bold text-slate-400 dark:text-slate-400">FY {yr}</div>
-                                          <input
-                                            type="number"
-                                            step="0.1"
-                                            min="0"
-                                            max="100"
-                                            value={val}
-                                            onChange={(e) => handlePerformanceEvaluationChangeDirect(talent.id, yearKey, parseFloat(e.target.value) || 0)}
-                                            className="text-[9px] font-black bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-0.5 w-full text-center text-slate-800 dark:text-slate-100 focus:outline-none focus:border-primary font-mono"
-                                          />
-                                        </div>
-                                      );
-                                    })}
+                                  <div className="overflow-x-auto custom-scrollbar pb-0.5">
+                                    <div className="grid gap-1 text-center bg-white dark:bg-slate-800 p-1.5 rounded-lg border border-surface-container-highest dark:border-slate-700 min-w-[220px]" style={{ gridTemplateColumns: `repeat(${evaluationYears.length}, minmax(0, 1fr))` }}>
+                                      {evaluationYears.map((yr) => {
+                                        const yearKey = `fy${yr}`;
+                                        const val = talent.performanceEvaluation?.[yearKey] ?? 0;
+                                        return (
+                                          <div key={yr} className="space-y-1">
+                                            <div className="text-[8px] font-bold text-slate-400 dark:text-slate-400">FY {yr}</div>
+                                            <input
+                                              type="number"
+                                              step="0.1"
+                                              min="0"
+                                              max="100"
+                                              value={val}
+                                              onChange={(e) => handlePerformanceEvaluationChangeDirect(talent.id, yearKey, parseFloat(e.target.value) || 0)}
+                                              className="text-[9px] font-black bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-0.5 w-full text-center text-slate-800 dark:text-slate-100 focus:outline-none focus:border-primary font-mono"
+                                            />
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
                                   
                                   {(() => {
