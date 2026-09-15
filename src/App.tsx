@@ -4812,7 +4812,7 @@ grant all on succession_data to anon, authenticated, service_role;`
       <div className="flex flex-1 min-h-[calc(100vh-60px)] md:min-h-0 md:h-full relative w-full min-w-0 overflow-hidden">
         
         {/* Navigation Drawer (Desktop Sidebar with Collapse/Expand support) */}
-        <aside className={`hidden md:flex flex-col ${isSidebarCollapsed ? "w-[76px] p-2.5" : "w-[280px] p-4"} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-none space-y-2 z-40 shrink-0 h-full overflow-y-auto transition-all duration-300 ease-in-out`}>
+        <aside className={`hidden md:flex flex-col ${isSidebarCollapsed ? "w-[76px] p-2.5" : "w-[280px] p-4"} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-none space-y-2 z-40 shrink-0 h-full overflow-y-auto custom-scrollbar transition-all duration-300 ease-in-out`}>
           
           {/* Brand Logo & Collapse Toggle Header */}
           <div className={`flex ${isSidebarCollapsed ? "flex-col gap-3 p-1" : "items-center justify-between pb-3.5 px-1"} mb-2 border-b border-slate-200 dark:border-slate-800`}>
@@ -5053,12 +5053,12 @@ grant all on succession_data to anon, authenticated, service_role;`
         <div className="flex-1 flex flex-col min-w-0 md:h-full overflow-hidden">
           
           {/* Stagnant Desktop Header Bar (Tetap di atas, tidak ikut ter-scroll) */}
-          <header className="hidden md:flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 shrink-0 shadow-2xs">
-            <div className="max-w-7xl w-full mx-auto flex justify-between items-center gap-3 lg:gap-6">
+          <header className="hidden md:flex items-center justify-between px-3 sm:px-4 lg:px-6 py-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 shrink-0 shadow-2xs">
+            <div className="w-full mx-auto flex justify-between items-center gap-2 lg:gap-4 min-w-0">
               
-              {/* Left Context: Tab Icon Badge, Dynamic Breadcrumb & Status Pill (Bebas tumpang tindih) */}
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200/70 dark:border-teal-800/70 flex items-center justify-center text-primary dark:text-teal-400 shrink-0 shadow-2xs">
+              {/* Left Context: Tab Icon Badge, Dynamic Breadcrumb & Status Pill (Adaptif & Bebas tumpang tindih) */}
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200/70 dark:border-teal-800/70 flex items-center justify-center text-primary dark:text-teal-400 shrink-0 shadow-2xs">
                   {activeTab === "home" && <LayoutGrid className="w-5 h-5" />}
                   {activeTab === "talent-pool" && <Users className="w-5 h-5" />}
                   {activeTab === "nine-box" && <Grid3X3 className="w-5 h-5" />}
@@ -5066,9 +5066,9 @@ grant all on succession_data to anon, authenticated, service_role;`
                   {activeTab === "settings" && <Sliders className="w-5 h-5" />}
                 </div>
 
-                <div className="shrink-0">
-                  <div className="flex items-center gap-2 whitespace-nowrap">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-teal-400/90 leading-none">
+                <div className="min-w-0">
+                  <div className="hidden xl:flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-teal-400/90 leading-none truncate">
                       Ajinomoto Succession Portal
                     </span>
                     <span className="text-slate-300 dark:text-slate-700 leading-none">•</span>
@@ -5077,61 +5077,61 @@ grant all on succession_data to anon, authenticated, service_role;`
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2.5 mt-0.5 whitespace-nowrap">
+                  <div className="flex items-center gap-2 mt-0.5 min-w-0">
                     {userRole === "admin" ? (
                       <>
                         {activeTab === "profile" ? (
                           <>
                             <button 
                               onClick={() => setActiveTab("talent-pool")}
-                              className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition-colors cursor-pointer"
+                              className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-teal-300 transition-colors cursor-pointer shrink-0"
                             >
                               Talent Pool
                             </button>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <h2 className="text-xs sm:text-sm lg:text-base font-bold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[180px] xl:max-w-none">
                               {currentTalent.name}
                             </h2>
-                            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 shrink-0">
+                            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 shrink-0 hidden lg:inline-block">
                               {currentTalent.division}
                             </span>
                           </>
                         ) : activeTab === "home" ? (
                           <>
-                            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                            <h2 className="text-xs sm:text-sm lg:text-base font-bold text-slate-900 dark:text-white truncate">
                               Executive Dashboard
                             </h2>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300 border border-teal-500/20">
+                            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300 border border-teal-500/20 shrink-0">
                               <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
                               Overview FY 24/25
                             </span>
                           </>
                         ) : activeTab === "talent-pool" ? (
                           <>
-                            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                            <h2 className="text-xs sm:text-sm lg:text-base font-bold text-slate-900 dark:text-white truncate">
                               Talent Directory & Pool
                             </h2>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-500/20">
+                            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-500/20 shrink-0">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              {talents.length} Talenta Terdaftar
+                              {talents.length} Talenta
                             </span>
                           </>
                         ) : activeTab === "nine-box" ? (
                           <>
-                            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                              Nine-Box Matrix Grid
+                            <h2 className="text-xs sm:text-sm lg:text-base font-bold text-slate-900 dark:text-white truncate">
+                              Nine-Box Matrix
                             </h2>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-500/20">
+                            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-500/20 shrink-0">
                               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                              {readyNowCount} Ready Immediately
+                              {readyNowCount} Ready
                             </span>
                           </>
                         ) : (
                           <>
-                            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                              Advisory & System Controls
+                            <h2 className="text-xs sm:text-sm lg:text-base font-bold text-slate-900 dark:text-white truncate">
+                              Advisory Controls
                             </h2>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-500/20">
+                            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-500/20 shrink-0">
                               <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                               Rules & Security
                             </span>
@@ -5140,12 +5140,12 @@ grant all on succession_data to anon, authenticated, service_role;`
                       </>
                     ) : (
                       <>
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Profil Saya</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                        <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">Profil Saya</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <h2 className="text-xs sm:text-sm lg:text-base font-bold text-slate-900 dark:text-white truncate max-w-[140px] sm:max-w-none">
                           {currentTalent.name}
                         </h2>
-                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 shrink-0">
+                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 shrink-0 hidden sm:inline-block">
                           {currentTalent.division}
                         </span>
                       </>
@@ -5154,23 +5154,23 @@ grant all on succession_data to anon, authenticated, service_role;`
                 </div>
               </div>
               
-              {/* Right Action Center & Utilities: Proporsional, Eksklusif & Anti-Overlap */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Right Action Center & Utilities: Proporsional, Responsif, Zero-Overlap & Lengkap */}
+              <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
                 {/* Search & Quick Command Palette Launcher */}
                 <button
                   onClick={() => setIsCommandPaletteOpen(true)}
-                  className="h-8.5 px-2.5 sm:px-3 rounded-lg bg-slate-100 hover:bg-slate-200/90 dark:bg-slate-800 dark:hover:bg-slate-700/90 border border-slate-200/90 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-2xs hover:shadow-xs transition-all flex items-center gap-2 cursor-pointer group active:scale-95"
+                  className="h-8.5 px-2 sm:px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200/90 dark:bg-slate-800 dark:hover:bg-slate-700/90 border border-slate-200/90 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-2xs hover:shadow-xs transition-all flex items-center gap-1.5 cursor-pointer group active:scale-95 shrink-0"
                   title="Cari talenta, divisi, skor atau aksi cepat (Ctrl + K)"
                 >
-                  <Search className="w-3.5 h-3.5 text-slate-500 dark:text-teal-400 group-hover:text-primary dark:group-hover:text-teal-300 transition-colors" />
-                  <span className="hidden xl:inline text-slate-600 dark:text-slate-300 font-medium">Cari Talenta...</span>
-                  <kbd className="hidden sm:inline-block font-mono text-[9px] font-bold bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-1 py-0.5 rounded shadow-2xs">Ctrl K</kbd>
+                  <Search className="w-3.5 h-3.5 text-slate-500 dark:text-teal-400 group-hover:text-primary dark:group-hover:text-teal-300 transition-colors shrink-0" />
+                  <span className="hidden 2xl:inline text-slate-600 dark:text-slate-300 font-medium">Cari Talenta...</span>
+                  <kbd className="hidden lg:inline-block font-mono text-[9px] font-bold bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-1 py-0.5 rounded shadow-2xs">Ctrl K</kbd>
                 </button>
 
                 {/* Utilities: Dark Mode Toggle & Keyboard Shortcuts */}
                 <button 
                   onClick={() => setIsDarkMode(!isDarkMode)}
-                  className="h-8.5 w-8.5 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 transition-all shadow-2xs cursor-pointer active:scale-95"
+                  className="h-8.5 w-8.5 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
                   title={isDarkMode ? "Ganti ke Mode Terang (Light Mode)" : "Ganti ke Mode Gelap (Dark Mode)"}
                 >
                   {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-slate-700" />}
@@ -5178,33 +5178,33 @@ grant all on succession_data to anon, authenticated, service_role;`
 
                 <button 
                   onClick={() => setIsShortcutsModalOpen(true)}
-                  className="h-8.5 w-8.5 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-sky-400 transition-all shadow-2xs cursor-pointer active:scale-95"
+                  className="h-8.5 w-8.5 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-sky-400 transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
                   title="Panduan Shortcut Keyboard (?)"
                 >
                   <Keyboard className="w-4 h-4" />
                 </button>
 
-                <div className="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
+                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 hidden xl:block"></div>
 
                 {/* Edit Profil Lengkap Button (Ketika di Tab Profile) */}
                 {activeTab === "profile" && (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     <button 
                       onClick={handleOpenEditProfile}
-                      className="h-8.5 px-3 bg-white dark:bg-slate-800 hover:bg-surface-container-low dark:hover:bg-slate-700 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                      className="h-8.5 px-2 sm:px-2.5 lg:px-3 bg-white dark:bg-slate-800 hover:bg-surface-container-low dark:hover:bg-slate-700 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
                       title="Edit Profil Lengkap Talenta"
                     >
-                      <Edit2 className="w-3.5 h-3.5 text-primary dark:text-teal-400" />
-                      <span>Edit Profil</span>
+                      <Edit2 className="w-3.5 h-3.5 text-primary dark:text-teal-400 shrink-0" />
+                      <span className="hidden xl:inline">Edit </span><span>Profil</span>
                     </button>
                     {userRole === "admin" && (
                       <button 
                         onClick={() => handleDeleteTalent(currentTalent.id, currentTalent.name)}
-                        className="h-8.5 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                        className="h-8.5 px-2 sm:px-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shadow-2xs font-semibold text-xs rounded-lg transition-all flex items-center gap-1 active:scale-95 cursor-pointer shrink-0"
                         title="Hapus Talenta dari Master System"
                       >
-                        <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                        <span>Hapus</span>
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                        <span className="hidden lg:inline">Hapus</span>
                       </button>
                     )}
                   </div>
@@ -5214,44 +5214,44 @@ grant all on succession_data to anon, authenticated, service_role;`
                 {userRole === "admin" && (
                   <button 
                     onClick={() => setIsEditingScores(!isEditingScores)}
-                    className={`h-8.5 px-3 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
+                    className={`h-8.5 px-2 sm:px-2.5 lg:px-3 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer shrink-0 ${
                       isEditingScores 
                         ? "bg-amber-600 text-white shadow-xs hover:bg-amber-700 border border-amber-600" 
                         : "bg-white dark:bg-slate-800 text-secondary dark:text-slate-100 border border-surface-container-highest dark:border-slate-700 shadow-2xs hover:bg-surface-container-low dark:hover:bg-slate-700"
                     }`}
                     title="Mode Edit Skor / Simulasi Metrics Assessment"
                   >
-                    <Sliders className="w-3.5 h-3.5" />
-                    <span>{isEditingScores ? "Lock Metrics" : "Edit Skor"}</span>
+                    <Sliders className="w-3.5 h-3.5 shrink-0" />
+                    <span>{isEditingScores ? "Lock" : "Edit Skor"}</span>
                   </button>
                 )}
 
-                <div className="h-4 w-px bg-surface-container-highest dark:border-slate-700 mx-0.5 hidden sm:block"></div>
+                <div className="h-4 w-px bg-surface-container-highest dark:border-slate-700 mx-0.5 hidden xl:block"></div>
 
                 <button 
                   onClick={() => setIsOverallSummaryModalOpen(true)}
-                  className="h-8.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                  className="h-8.5 px-2 sm:px-2.5 lg:px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
                   title="Cetak & Unduh Summary Report Keseluruhan Data System"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
-                  <span>Summary System</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
+                  <span>Summary<span className="hidden xl:inline"> System</span></span>
                 </button>
 
                 <button 
                   onClick={() => setIsReportModalOpen(true)}
-                  className="h-8.5 px-3.5 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                  className="h-8.5 px-2.5 sm:px-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
                   title="Download Laporan Individual PDF"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download PDF</span>
+                  <Download className="w-3.5 h-3.5 shrink-0" />
+                  <span><span className="hidden xl:inline">Download </span>PDF</span>
                 </button>
 
                 <button 
                   onClick={() => handleOpenSendEmail("summary")}
-                  className="h-8.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer border border-amber-400"
+                  className="h-8.5 px-2 sm:px-2.5 lg:px-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow-2xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer border border-amber-400 shrink-0 whitespace-nowrap"
                   title="Kirim Laporan Summary / Individual via Email Gateway"
                 >
-                  <Mail className="w-3.5 h-3.5 text-slate-950" />
+                  <Mail className="w-3.5 h-3.5 text-slate-950 shrink-0" />
                   <span>Email</span>
                 </button>
               </div>
